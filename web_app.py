@@ -3582,10 +3582,10 @@ def api_registros_completos():
                 if obj:
                     objeto_id = obj[0]['id']
                     # Buscar foto frontal
-                    query_foto = "SELECT path FROM objetos_imagenes WHERE objeto_id = %s AND vista = 'frontal' LIMIT 1"
+                    query_foto = "SELECT id FROM objetos_imagenes WHERE objeto_id = %s AND vista = 'frontal' LIMIT 1"
                     foto = db_manager.execute_query(query_foto, (objeto_id,))
                     if foto:
-                        eq['foto_frontal'] = foto[0]['path']
+                        eq['foto_frontal'] = f'/imagenes_objeto/{foto[0]["id"]}'
                         eq['entrenado_ia'] = True
                 
                 registros.append(eq)
@@ -3615,10 +3615,10 @@ def api_registros_completos():
                 if obj:
                     objeto_id = obj[0]['id']
                     # Buscar foto frontal
-                    query_foto = "SELECT path FROM objetos_imagenes WHERE objeto_id = %s AND vista = 'frontal' LIMIT 1"
+                    query_foto = "SELECT id FROM objetos_imagenes WHERE objeto_id = %s AND vista = 'frontal' LIMIT 1"
                     foto = db_manager.execute_query(query_foto, (objeto_id,))
                     if foto:
-                        item['foto_frontal'] = foto[0]['path']
+                        item['foto_frontal'] = f'/imagenes_objeto/{foto[0]["id"]}'
                         item['entrenado_ia'] = True
                 
                 registros.append(item)
@@ -3634,7 +3634,7 @@ def api_registros_completos():
         traceback.print_exc()
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/registro-detalle/<tipo>/<int:id>')
+@app.route('/api/registro-detalle/<tipo>/<id>')
 @require_login
 @require_level(4)
 def api_registro_detalle(tipo, id):
@@ -3667,7 +3667,7 @@ def api_registro_detalle(tipo, id):
         
         # Obtener fotos
         if registro.get('objeto_id'):
-            query_fotos = "SELECT path, vista FROM objetos_imagenes WHERE objeto_id = %s"
+            query_fotos = "SELECT id, path, vista FROM objetos_imagenes WHERE objeto_id = %s"
             fotos = db_manager.execute_query(query_fotos, (registro['objeto_id'],))
             registro['fotos'] = fotos
         else:
@@ -3679,7 +3679,101 @@ def api_registro_detalle(tipo, id):
         print(f"[ERROR] Error obteniendo detalle: {str(e)}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/registro-eliminar/<tipo>/<int:id>', methods=['DELETE'])
+@app.route('/api/registro-editar/<tipo>/<id>', methods=['GET'])
+@require_login
+@require_level(4)
+def api_registro_editar(tipo, id):
+    """API para obtener datos de un registro para edición"""
+    try:
+        if tipo == 'equipo':
+            query = """
+                SELECT e.*, l.nombre as laboratorio_nombre, o.id as objeto_id
+                FROM equipos e
+                LEFT JOIN laboratorios l ON e.laboratorio_id = l.id
+                LEFT JOIN objetos o ON e.objeto_id = o.id
+                WHERE e.id = %s
+            """
+        else:
+            query = """
+                SELECT i.*, l.nombre as laboratorio_nombre
+                FROM inventario i
+                LEFT JOIN laboratorios l ON i.laboratorio_id = l.id
+                WHERE i.id = %s
+            """
+        
+        result = db_manager.execute_query(query, (id,))
+        
+        if not result:
+            return jsonify({'success': False, 'message': 'Registro no encontrado'}), 404
+        
+        registro = result[0]
+        
+        # Obtener fotos si existen
+        if tipo == 'equipo' and registro.get('objeto_id'):
+            query_fotos = "SELECT id, path, vista FROM objetos_imagenes WHERE objeto_id = %s"
+            fotos = db_manager.execute_query(query_fotos, (registro['objeto_id'],))
+            registro['fotos'] = fotos
+        else:
+            registro['fotos'] = []
+        
+        return jsonify({'success': True, 'registro': registro})
+        
+    except Exception as e:
+        print(f"[ERROR] Error obteniendo registro para editar: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/registro-actualizar/<tipo>/<id>', methods=['PUT'])
+@require_login
+@require_level(4)
+def api_registro_actualizar(tipo, id):
+    """API para actualizar un registro"""
+    try:
+        data = request.get_json()
+        
+        if tipo == 'equipo':
+            query = """
+                UPDATE equipos 
+                SET nombre = %s, tipo = %s, descripcion = %s,
+                    ubicacion = %s, estado = %s, laboratorio_id = %s
+                WHERE id = %s
+            """
+            params = (
+                data.get('nombre'),
+                data.get('categoria'),  # Se mapea a 'tipo' en equipos
+                data.get('descripcion'),
+                data.get('ubicacion'),
+                data.get('estado'),
+                data.get('laboratorio_id'),
+                id
+            )
+        else:
+            query = """
+                UPDATE inventario 
+                SET nombre = %s, categoria = %s, descripcion = %s,
+                    ubicacion = %s, cantidad_actual = %s, laboratorio_id = %s
+                WHERE id = %s
+            """
+            params = (
+                data.get('nombre'),
+                data.get('categoria'),
+                data.get('descripcion'),
+                data.get('ubicacion'),
+                data.get('stock_actual'),
+                data.get('laboratorio_id'),
+                id
+            )
+        
+        db_manager.execute_query(query, params)
+        
+        return jsonify({'success': True, 'message': 'Registro actualizado exitosamente'})
+        
+    except Exception as e:
+        print(f"[ERROR] Error actualizando registro: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/registro-eliminar/<tipo>/<id>', methods=['DELETE'])
 @require_login
 @require_level(4)
 def api_registro_eliminar(tipo, id):
@@ -3739,6 +3833,69 @@ def servir_imagen_objeto(imagen_id):
     except Exception as e:
         print(f"[ERROR] Error sirviendo imagen: {str(e)}")
         return "Error al cargar imagen", 500
+
+
+@app.route('/api/reemplazar-imagen', methods=['POST'])
+@require_login
+@require_level(4)
+def api_reemplazar_imagen():
+    """API para reemplazar una imagen existente"""
+    try:
+        # Obtener datos del formulario
+        imagen_id = request.form.get('imagen_id')
+        vista = request.form.get('vista')
+        objeto_id = request.form.get('objeto_id')
+        archivo = request.files.get('imagen')
+        
+        if not all([imagen_id, vista, objeto_id, archivo]):
+            return jsonify({'success': False, 'message': 'Faltan datos requeridos'}), 400
+        
+        # Obtener la ruta actual de la imagen
+        query_old = "SELECT path FROM objetos_imagenes WHERE id = %s"
+        result = db_manager.execute_query(query_old, (imagen_id,))
+        
+        if not result:
+            return jsonify({'success': False, 'message': 'Imagen no encontrada'}), 404
+        
+        old_path = result[0]['path']
+        
+        # Crear directorio si no existe
+        objeto_dir = os.path.join('imagenes', 'objetos')
+        os.makedirs(objeto_dir, exist_ok=True)
+        
+        # Generar nombre de archivo único
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"obj_{objeto_id}_{vista}_{timestamp}.jpg"
+        new_path = os.path.join(objeto_dir, filename)
+        
+        # Guardar nueva imagen
+        archivo.save(new_path)
+        
+        # Actualizar ruta en base de datos
+        query_update = "UPDATE objetos_imagenes SET path = %s WHERE id = %s"
+        db_manager.execute_query(query_update, (new_path, imagen_id))
+        
+        # Eliminar imagen antigua si existe y es diferente
+        if old_path and os.path.exists(old_path) and old_path != new_path:
+            try:
+                os.remove(old_path)
+                print(f"[INFO] Imagen antigua eliminada: {old_path}")
+            except Exception as e:
+                print(f"[WARN] No se pudo eliminar imagen antigua: {e}")
+        
+        print(f"[INFO] Imagen reemplazada: {imagen_id} -> {new_path}")
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Imagen reemplazada exitosamente',
+            'new_path': new_path
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error reemplazando imagen: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # =============================
 # OBJETOS: Gestión individual (GET, PUT, DELETE)
