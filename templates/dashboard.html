@@ -100,7 +100,7 @@
         <div class="d-flex align-items-center justify-content-between">
           <div>
             <div class="stat-label mb-2">Equipos Activos</div>
-            <div class="stat-value text-success">{{ stats.get('equipos_estado', {}).get('en_uso', 0) }}</div>
+            <div class="stat-value text-success">{{ stats.get('equipos_activos', 0) }}</div>
           </div>
           <div class="stat-icon gradient-sena text-white">
             <i class="bi bi-cpu"></i>
@@ -147,11 +147,11 @@
       <div class="card-body p-4">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <div class="stat-label mb-2">Comandos (7d)</div>
-            <div class="stat-value text-primary">{{ stats.get('comandos_semana', 0) }}</div>
+            <div class="stat-label mb-2">Laboratorios</div>
+            <div class="stat-value text-primary">{{ stats.get('total_laboratorios', 0) }}</div>
           </div>
           <div class="stat-icon gradient-primary text-white">
-            <i class="bi bi-mic-fill"></i>
+            <i class="bi bi-building"></i>
           </div>
         </div>
       </div>

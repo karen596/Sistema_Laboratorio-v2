@@ -805,6 +805,14 @@ def ayuda():
     return render_template('ayuda.html', user=session if 'user_id' in session else None)
 
 
+@app.route('/design-system')
+@require_login
+@require_level(4)
+def design_system():
+    """Sistema de diseño - Solo para administradores"""
+    return render_template('design_system.html', user=session)
+
+
 @app.route('/modulos')
 def modulos():
     """Vista de todos los módulos del proyecto"""
@@ -862,8 +870,12 @@ def backup():
             backup_file = backup_dir / f'backup_{timestamp}.sql'
             
             try:
+                # Usar ruta completa de mysqldump si está disponible
+                mysqldump_path = os.getenv('MYSQLDUMP_PATH', 'mysqldump')
+                
                 cmd = [
-                    'mysqldump',
+                    mysqldump_path,
+                    '-h', os.getenv('HOST', 'localhost'),
                     '-u', os.getenv('USUARIO_PRODUCCION', 'laboratorio_prod'),
                     f"-p{os.getenv('PASSWORD_PRODUCCION', '')}",
                     '--single-transaction',
@@ -886,8 +898,12 @@ def backup():
             
             if backup_file.exists():
                 try:
+                    # Usar ruta completa de mysql si está disponible
+                    mysql_path = os.getenv('MYSQL_PATH', 'mysql')
+                    
                     cmd = [
-                        'mysql',
+                        mysql_path,
+                        '-h', os.getenv('HOST', 'localhost'),
                         '-u', os.getenv('USUARIO_PRODUCCION', 'laboratorio_prod'),
                         f"-p{os.getenv('PASSWORD_PRODUCCION', '')}",
                         os.getenv('BASE_DATOS', 'laboratorio_sistema')
@@ -899,6 +915,20 @@ def backup():
                     flash(f'Backup restaurado exitosamente: {backup_name}', 'success')
                 except Exception as e:
                     flash(f'Error restaurando backup: {str(e)}', 'error')
+            else:
+                flash('Archivo de backup no encontrado', 'error')
+        
+        elif action == 'delete':
+            # Eliminar backup
+            backup_name = request.form.get('backup_file')
+            backup_file = backup_dir / backup_name
+            
+            if backup_file.exists():
+                try:
+                    backup_file.unlink()  # Eliminar archivo
+                    flash(f'Backup eliminado exitosamente: {backup_name}', 'success')
+                except Exception as e:
+                    flash(f'Error eliminando backup: {str(e)}', 'error')
             else:
                 flash('Archivo de backup no encontrado', 'error')
         
@@ -1244,6 +1274,10 @@ def get_dashboard_stats():
     eq = db_manager.execute_query("SELECT estado, COUNT(*) cantidad FROM equipos GROUP BY estado")
     stats['equipos_estado'] = {r['estado']: r['cantidad'] for r in eq} if eq else {}
     
+    # Total de equipos activos (excluyendo fuera de servicio)
+    activos = db_manager.execute_query("SELECT COUNT(*) cantidad FROM equipos WHERE estado != 'fuera_servicio'")
+    stats['equipos_activos'] = activos[0]['cantidad'] if activos else 0
+    
     # Equipos disponibles (más útil que críticos)
     disp = db_manager.execute_query("SELECT COUNT(*) cantidad FROM equipos WHERE estado = 'disponible'")
     stats['equipos_disponibles'] = disp[0]['cantidad'] if disp else 0
@@ -1259,14 +1293,6 @@ def get_dashboard_stats():
     # Reservas próximas (incluye programadas y activas, sin filtro de fecha estricto)
     prox = db_manager.execute_query("SELECT COUNT(*) cantidad FROM reservas WHERE estado IN ('activa', 'programada')")
     stats['reservas_proximas'] = prox[0]['cantidad'] if prox else 0
-    
-    # Comandos de la última semana (más realista)
-    sem = db_manager.execute_query("SELECT COUNT(*) cantidad FROM comandos_voz WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")
-    stats['comandos_semana'] = sem[0]['cantidad'] if sem else 0
-    
-    # Usuarios activos en la semana
-    ua_sem = db_manager.execute_query("SELECT COUNT(DISTINCT usuario_id) cantidad FROM comandos_voz WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")
-    stats['usuarios_activos_semana'] = ua_sem[0]['cantidad'] if ua_sem else 0
     
     # Total de laboratorios activos
     labs = db_manager.execute_query("SELECT COUNT(*) cantidad FROM laboratorios WHERE estado = 'activo'")
@@ -3562,7 +3588,7 @@ def api_registros_completos():
         # Obtener equipos - solo columnas básicas
         try:
             query_equipos = """
-                SELECT e.id, e.nombre, e.tipo as categoria, 
+                SELECT e.id, e.nombre, e.tipo as categoria, e.estado,
                     e.laboratorio_id, l.nombre as laboratorio_nombre
                 FROM equipos e
                 LEFT JOIN laboratorios l ON e.laboratorio_id = l.id
@@ -3572,7 +3598,7 @@ def api_registros_completos():
             
             for eq in equipos:
                 eq['tipo'] = 'equipo'
-                eq['estado'] = 'disponible'  # Default
+                # El estado ya viene de la BD, no lo sobrescribimos
                 eq['entrenado_ia'] = False
                 eq['foto_frontal'] = None
                 
@@ -3595,7 +3621,7 @@ def api_registros_completos():
         # Obtener items - solo columnas básicas
         try:
             query_items = """
-                SELECT i.id, i.nombre, i.categoria,
+                SELECT i.id, i.nombre, i.categoria, i.cantidad_actual as stock_actual,
                        i.laboratorio_id, l.nombre as laboratorio_nombre
                 FROM inventario i
                 LEFT JOIN laboratorios l ON i.laboratorio_id = l.id
@@ -3605,7 +3631,7 @@ def api_registros_completos():
             
             for item in items:
                 item['tipo'] = 'item'
-                item['stock_actual'] = 0  # Default
+                # El stock_actual ya viene de la BD, no lo sobrescribimos
                 item['entrenado_ia'] = False
                 item['foto_frontal'] = None
                 

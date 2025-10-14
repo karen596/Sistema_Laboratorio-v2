@@ -1,55 +1,128 @@
 # =============================
 # SISTEMA DE LABORATORIOS - CENTRO MINERO SENA
-# Dependencias Esenciales y Funcionales
+# Dependencias Actualizadas y Verificadas
+# Python 3.13.5 Compatible
 # =============================
 
-# Framework Web
-Flask==3.0.3
-flask-restful==0.3.10
-flask-jwt-extended==4.6.0
-flask-cors==4.0.0
+# =====================
+# FRAMEWORK WEB Y API
+# =====================
+Flask==3.1.1
+Flask-RESTful==0.3.10
+Flask-JWT-Extended==4.7.1
+flask-cors==6.0.1
+Werkzeug==3.1.3
 
-# Base de datos
-mysql-connector-python==8.1.0
+# =====================
+# BASE DE DATOS
+# =====================
+mysql-connector-python==9.4.0
 
-# Configuración
-python-dotenv==1.0.1
+# =====================
+# CONFIGURACIÓN Y ENTORNO
+# =====================
+python-dotenv==1.0.0
+python-decouple==3.8
 
-# Procesamiento de imágenes y visión computacional
-opencv-python==4.8.1.78
-Pillow==10.0.1
-numpy==1.24.3
+# =====================
+# PROCESAMIENTO DE IMÁGENES Y VISIÓN COMPUTACIONAL
+# =====================
+opencv-python==4.12.0.88
+Pillow==11.3.0
+numpy==2.2.6
 
-# Reconocimiento Facial
+# =====================
+# RECONOCIMIENTO FACIAL (OPCIONAL)
+# =====================
+# Nota: face-recognition requiere dlib, que puede ser difícil de instalar en Windows
+# Si tienes problemas, descarga wheels precompilados desde:
+# https://github.com/z-mahmud22/Dlib_Windows_Python3.x
 face-recognition==1.3.0
-dlib==19.24.2
+# dlib==19.24.6  # Descomentar después de instalar desde wheel
 
-# Reconocimiento de voz y síntesis
+# =====================
+# RECONOCIMIENTO DE VOZ Y SÍNTESIS
+# =====================
 SpeechRecognition==3.10.0
 pyttsx3==2.90
-# Nota: En Windows, SpeechRecognition suele requerir PyAudio.
-# Si falla la instalación, pruebe:
+
+# Nota: En Windows, para captura de audio en tiempo real necesitas PyAudio
+# Instalación recomendada:
 #   pip install pipwin
 #   pipwin install pyaudio
+# O descarga wheel desde: https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio
+# pyaudio==0.2.14
 
-# IA Avanzada - Reconocimiento de Voz
-deepspeech==0.9.3
+# =====================
+# IA AVANZADA - RECONOCIMIENTO DE VOZ (OPCIONAL)
+# =====================
+# Nota: DeepSpeech está descontinuado, considera usar alternativas como:
+# - Vosk (offline, ligero)
+# - Whisper de OpenAI (más preciso)
+# deepspeech==0.9.3
 webrtcvad==2.0.10
-# pyaudio==0.2.11  # Descomentar si necesitas captura de audio en tiempo real
 
-# IA Avanzada - Visión por Computadora
-tensorflow==2.13.0
-# tflite-runtime==2.13.0  # Alternativa ligera a TensorFlow completo
-scikit-image==0.21.0
+# =====================
+# IA AVANZADA - VISIÓN POR COMPUTADORA (OPCIONAL)
+# =====================
+# Nota: TensorFlow es pesado. Para producción considera tflite-runtime
+# tensorflow==2.16.1
+# tflite-runtime==2.14.0  # Alternativa ligera (solo inferencia)
+scikit-image==0.24.0
 
-# Utilidades adicionales para IA
-librosa==0.10.1
-matplotlib==3.7.2
-seaborn==0.12.2
+# =====================
+# UTILIDADES ADICIONALES PARA IA
+# =====================
+# librosa==0.10.2  # Para procesamiento de audio avanzado
+# matplotlib==3.9.0  # Para visualización
+# seaborn==0.13.2  # Para gráficos estadísticos
 
-# Utilidades de fecha y tiempo
+# =====================
+# UTILIDADES DE FECHA Y TIEMPO
+# =====================
 python-dateutil==2.9.0.post0
 pytz==2025.2
 
-# Monitoreo del sistema
-psutil==5.9.8
+# =====================
+# MONITOREO Y SISTEMA
+# =====================
+psutil==7.1.0
+
+# =====================
+# UTILIDADES GENERALES
+# =====================
+requests==2.32.5
+urllib3==2.5.0
+certifi==2025.8.3
+charset-normalizer==3.4.3
+idna==3.10
+
+# =====================
+# DESARROLLO Y TESTING (OPCIONAL)
+# =====================
+# pytest==8.3.5
+# black==25.1.0
+# flake8==7.2.0
+
+# =====================
+# NOTAS DE INSTALACIÓN
+# =====================
+# 1. Instala primero las dependencias básicas:
+#    pip install -r requirements.txt
+#
+# 2. Para reconocimiento facial (opcional):
+#    - Descarga dlib wheel para Python 3.13 desde:
+#      https://github.com/z-mahmud22/Dlib_Windows_Python3.x
+#    - pip install dlib-19.24.6-cp313-cp313-win_amd64.whl
+#    - pip install face-recognition
+#
+# 3. Para captura de audio (opcional):
+#    - pip install pipwin
+#    - pipwin install pyaudio
+#
+# 4. Para IA avanzada (opcional):
+#    - pip install tensorflow  # O tflite-runtime para versión ligera
+#    - pip install librosa matplotlib seaborn
+#
+# 5. El sistema funciona sin las dependencias opcionales,
+#    usando implementaciones de respaldo con OpenCV

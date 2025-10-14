@@ -98,7 +98,7 @@
       <div class="card-body text-center p-3">
         <i class="bi bi-cpu text-success" style="font-size: 2rem;"></i>
         <h4 class="mb-0 mt-2" id="totalEquipos">--</h4>
-        <small class="text-muted">Total Equipos</small>
+        <small class="text-muted">Equipos Activos</small>
       </div>
     </div>
   </div>
@@ -296,9 +296,8 @@ async function cargarDatos() {
 function renderizarDatos(data) {
   console.log('[DEBUG] Datos recibidos del API:', data);
   
-  // Calcular total de equipos desde equipos_estado
-  const totalEquipos = data.equipos_estado ? 
-    Object.values(data.equipos_estado).reduce((a, b) => a + b, 0) : 0;
+  // Calcular total de equipos activos (excluyendo fuera_servicio)
+  const totalEquipos = data.equipos_activos || 0;
   
   // Obtener total de usuarios desde el endpoint correcto
   // Hacer una petición adicional para obtener el total real de usuarios
