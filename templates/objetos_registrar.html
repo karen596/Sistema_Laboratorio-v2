@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+{% set title = 'Registrar Items (Visión)' %}
+{% block content %}
+<style>
+  .registro-header {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+  }
+  .tipo-registro-btn {
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+  .tipo-registro-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .camera-preview {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  }
+  .vista-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 3px;
+  }
+  .vista-completada {
+    background: #d4edda;
+    color: #155724;
+  }
+  .vista-pendiente {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  .card-registro {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+  .card-registro:hover {
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+  }
+</style>
+
+<!-- Header -->
+<div class="registro-header">
+  <h3 class="mb-2"><i class="bi bi-camera-video me-2"></i>Registrar Objetos para IA Visual</h3>
+  <p class="mb-0 opacity-75">Captura imágenes desde múltiples ángulos para entrenar el sistema de reconocimiento</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <div class="card card-registro">
+      <div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 2px solid #dee2e6;">
+        <h5 class="mb-0"><i class="bi bi-plus-circle-fill me-2 text-success"></i>Nuevo Registro</h5>
+      </div>
+      <div class="card-body p-4">
+        <!-- Selector de tipo -->
+        <div class="mb-4">
+          <label class="form-label fw-bold text-sena mb-3">
+            <i class="bi bi-tag-fill me-2"></i>Tipo de Registro
+          </label>
+          <div class="row g-3">
+            <div class="col-6">
+              <input type="radio" class="btn-check" name="tipoRegistro" id="radioEquipo" value="equipo" checked>
+              <label class="btn btn-outline-primary tipo-registro-btn w-100 h-100" for="radioEquipo">
+                <div class="text-center py-2">
+                  <i class="bi bi-cpu d-block mb-2" style="font-size: 2rem;"></i>
+                  <strong>Equipo de Laboratorio</strong>
+                  <p class="small text-muted mb-0 mt-1">Instrumentos y máquinas</p>
+                </div>
+              </label>
+            </div>
+            <div class="col-6">
+              <input type="radio" class="btn-check" name="tipoRegistro" id="radioObjeto" value="objeto">
+              <label class="btn btn-outline-success tipo-registro-btn w-100 h-100" for="radioObjeto">
+                <div class="text-center py-2">
+                  <i class="bi bi-box-seam d-block mb-2" style="font-size: 2rem;"></i>
+                  <strong>Objeto General</strong>
+                  <p class="small text-muted mb-0 mt-1">EPP y herramientas</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input id="objNombre" class="form-control" placeholder="Ej: Microscopio óptico / Casco de seguridad">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Categoría/Tipo</label>
+            <input id="objCategoria" class="form-control" placeholder="Ej: Óptica / EPP">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Descripción</label>
+            <textarea id="objDescripcion" class="form-control" rows="2" placeholder="Características relevantes para el reconocimiento visual"></textarea>
+          </div>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-sena" id="btnCrearObjeto"><i class="bi bi-plus-lg me-1"></i>Crear registro</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-camera me-2"></i>Capturar o subir imagen</span>
+        <div>
+          <button class="btn btn-outline-sena btn-sm" id="btnAbrirCam" title="Activar cámara"><i class="bi bi-camera-video"></i> Activar Cámara</button>
+          <input type="file" id="fileImagen" accept="image/*" class="form-control form-control-sm d-inline-block" style="width:auto;">
+        </div>
+      </div>
+      <div class="alert alert-info mx-3 mt-3 mb-0">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Permisos de cámara:</strong> Al hacer clic en "Activar Cámara", el navegador solicitará permiso para acceder a tu cámara. Haz clic en <strong>"Aceptar"</strong> o <strong>"Permitir"</strong> en la ventana emergente.
+        <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#modalPermisos">
+          <i class="bi bi-question-circle me-1"></i>¿Cómo habilitar permisos?
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-7">
+            <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden">
+              <video id="objCam" autoplay playsinline muted class="w-100 h-100"></video>
+              <img id="objPreview" class="w-100 h-100 d-none" alt="preview" />
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="mb-2">
+              <label class="form-label">Vista (obligatoria)</label>
+              <select id="imgVista" class="form-select" required>
+                <option value="">Seleccione la vista...</option>
+                <option value="frontal">Frontal</option>
+                <option value="posterior">Posterior</option>
+                <option value="superior">Superior</option>
+                <option value="inferior">Inferior</option>
+                <option value="lateral_derecha">Lateral derecha</option>
+                <option value="lateral_izquierda">Lateral izquierda</option>
+              </select>
+              <div class="form-text">Cada objeto debe tener las 6 vistas.</div>
+            </div>
+            <input id="imgCarpeta" class="form-control mb-2 d-none" placeholder="Carpeta por nombre (auto)">
+            <label class="form-label">Notas</label>
+            <textarea id="imgNotas" class="form-control" rows="3"></textarea>
+            <div class="mt-3 d-flex gap-2">
+              <button class="btn btn-outline-sena" id="btnCapturar"><i class="bi bi-camera"></i> Capturar</button>
+              <button class="btn btn-sena" id="btnGuardarImagen"><i class="bi bi-save"></i> Guardar imagen</button>
+            </div>
+            <div class="mt-3">
+              <div class="small text-muted mb-1">Progreso de vistas guardadas</div>
+              <ul id="checkVistas" class="list-unstyled small mb-0">
+                <li data-v="frontal">□ Frontal</li>
+                <li data-v="posterior">□ Posterior</li>
+                <li data-v="superior">□ Superior</li>
+                <li data-v="inferior">□ Inferior</li>
+                <li data-v="lateral_derecha">□ Lateral derecha</li>
+                <li data-v="lateral_izquierda">□ Lateral izquierda</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <canvas id="objCanvas" class="d-none"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-5">
+    <div class="card">
+      <div class="card-header fw-semibold"><i class="bi bi-collection me-2"></i>Registros existentes</div>
+      <div class="card-body">
+        <div class="input-group mb-2" style="max-width:360px;">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input id="buscarObj" class="form-control" placeholder="Buscar por nombre/categoría">
+        </div>
+        <ul id="listaObjetos" class="list-group small"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const token = localStorage.getItem('jwt');
+  function needAuth(){ 
+    // Ya no es necesario JWT, usamos sesión web
+    return true;
+  }
+  async function api(url, opts={}){
+    const t = localStorage.getItem('jwt');
+    // Agregar JWT si existe, pero no es obligatorio (usamos sesión web)
+    opts.headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{}, t? {'Authorization':'Bearer '+t}: {});
+    const res = await fetch(url, opts);
+    await ApiAuth.ensureAuthOrPrompt(res);
+    return res;
+  }
+
+  // Crear objeto (unificado con imagen si está disponible)
+  document.getElementById('btnCrearObjeto').addEventListener('click', async ()=>{
+    try{
+      needAuth();
+      const nombre = document.getElementById('objNombre').value.trim();
+      const categoria = document.getElementById('objCategoria').value.trim();
+      const descripcion = document.getElementById('objDescripcion').value.trim();
+      const vista = document.getElementById('imgVista').value;
+      const notas = document.getElementById('imgNotas').value;
+      if(!nombre){ alert('Ingrese un nombre'); return; }
+      // Si hay imagen capturada/seleccionada y vista, crear y subir en un paso
+      if(currentDataUrl && vista){
+        const res = await api('/api/objetos/crear_con_imagen', {method:'POST', body: JSON.stringify({nombre, categoria, descripcion, image_base64: currentDataUrl, vista, notas, fuente: stream? 'camera':'upload'})});
+        const data = await res.json();
+        if(res.ok){
+          currentObjetoId = data.id; vistasGuardadas.add(vista); refreshChecklist();
+          alert('Objeto e imagen guardados'); cargarObjetos();
+        } else {
+          alert(data?.message || 'Error en registro unificado');
+        }
+        return;
+      }
+      // Fallback: crear solo el objeto
+      const res = await api('/api/objetos',{method:'POST', body: JSON.stringify({nombre, categoria, descripcion})});
+      const data = await res.json();
+      if(res.ok){ currentObjetoId = data.id; alert('Objeto creado'); cargarObjetos(); }
+      else{ alert(data?.message || 'Error creando objeto'); }
+    }catch(e){ console.warn(e); }
+  });
+
+  // Cámara
+  const video = document.getElementById('objCam');
+  const imgPrev = document.getElementById('objPreview');
+  const canvas = document.getElementById('objCanvas');
+  let stream = null; let currentDataUrl = null; let currentObjetoId = null;
+  const vistasRequeridas = ['frontal','posterior','superior','inferior','lateral_derecha','lateral_izquierda'];
+  const vistasGuardadas = new Set();
+  function refreshChecklist(){
+    document.querySelectorAll('#checkVistas li').forEach(li=>{
+      const v = li.getAttribute('data-v');
+      li.textContent = (vistasGuardadas.has(v)? '✔ ':'□ ') + li.textContent.replace(/^✔ |^□ /,'');
+      li.className = vistasGuardadas.has(v)? 'text-success':'text-muted';
+    });
+  }
+
+  document.getElementById('btnAbrirCam').addEventListener('click', async ()=>{
+    try{ 
+      console.log('Solicitando acceso a la cámara...');
+      // Solicitar permisos de cámara con configuración específica
+      const constraints = {
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'environment'
+        },
+        audio: false
+      };
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('Acceso a cámara concedido');
+      video.srcObject = stream;
+      video.play();
+      imgPrev.classList.add('d-none');
+      video.classList.remove('d-none');
+      alert('Cámara activada correctamente');
+    } catch(err) { 
+      console.error('Error al acceder a la cámara:', err);
+      let mensaje = 'No se pudo acceder a la cámara. ';
+      if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        mensaje += 'Por favor, permite el acceso a la cámara en la configuración de tu navegador.';
+      } else if(err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        mensaje += 'No se encontró ninguna cámara conectada.';
+      } else if(err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        mensaje += 'La cámara está siendo usada por otra aplicación.';
+      } else {
+        mensaje += err.message || 'Error desconocido.';
+      }
+      alert(mensaje);
+    }
+  });
+
+  document.getElementById('btnCapturar').addEventListener('click', ()=>{
+    if(!video.videoWidth){ alert('Activa la cámara primero o selecciona una imagen'); return; }
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d'); ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    currentDataUrl = canvas.toDataURL('image/jpeg',0.92);
+    imgPrev.src = currentDataUrl; imgPrev.classList.remove('d-none');
+  });
+
+  // Upload archivo
+  document.getElementById('fileImagen').addEventListener('change', async (ev)=>{
+    const f = ev.target.files?.[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = () => { currentDataUrl = reader.result; imgPrev.src = currentDataUrl; imgPrev.classList.remove('d-none'); };
+    reader.readAsDataURL(f);
+  });
+
+  // Guardar imagen
+  document.getElementById('btnGuardarImagen').addEventListener('click', async ()=>{
+    try{
+      needAuth();
+      const nombre = document.getElementById('objNombre').value.trim();
+      const categoria = document.getElementById('objCategoria').value.trim();
+      if(!nombre){ alert('Primero complete nombre del objeto'); return; }
+      if(!currentDataUrl){ alert('Capture o seleccione una imagen'); return; }
+      // Asegurar que el objeto exista/obtener id
+      let id = currentObjetoId;
+      if(!id){
+        const resCreate = await api('/api/objetos',{method:'POST', body: JSON.stringify({nombre, categoria, descripcion: document.getElementById('objDescripcion').value})});
+        const dataCreate = await resCreate.json();
+        if(!resCreate.ok){ 
+          if(dataCreate?.duplicado || dataCreate?.existe) {
+            const usar = confirm(`${dataCreate.message}\n\n¿Desea usar el objeto existente para agregar la imagen?`);
+            if(usar && dataCreate.id) {
+              id = dataCreate.id;
+              currentObjetoId = id;
+            } else {
+              return;
+            }
+          } else {
+            alert(dataCreate?.message||'Error creando objeto'); 
+            return; 
+          }
+        } else {
+          id = dataCreate.id;
+        }
+      }
+      const notas = document.getElementById('imgNotas').value;
+      const vista = document.getElementById('imgVista').value;
+      if(!vista){ alert('Seleccione la vista de la imagen'); return; }
+      const carpeta = document.getElementById('objNombre').value.trim(); // usar nombre como carpeta base
+      const tipoRegistro = document.querySelector('input[name="tipoRegistro"]:checked').value;
+      const res = await api(`/api/objetos/${id}/imagenes`,{method:'POST', body: JSON.stringify({image_base64: currentDataUrl, notas, carpeta, fuente: stream? 'camera':'upload', tipo_registro: tipoRegistro, vista})});
+      const data = await res.json();
+      if(res.ok){ 
+        vistasGuardadas.add(vista);
+        refreshChecklist();
+        const faltan = vistasRequeridas.filter(v=>!vistasGuardadas.has(v));
+        if(faltan.length===0){
+          alert('Se completaron las 6 vistas obligatorias.');
+        } else {
+          alert(`Imagen almacenada. Faltan vistas: ${faltan.join(', ')}`);
+        }
+        cargarObjetos(); 
+      }
+      else{ alert(data?.message || 'Error guardando imagen'); }
+    }catch(e){ console.warn(e); }
+  });
+
+  // Listado
+  async function cargarObjetos(q=''){
+    try{
+      needAuth();
+      const res = await api('/api/objetos'+(q? `?q=${encodeURIComponent(q)}`:''));
+      const data = await res.json();
+      const ul = document.getElementById('listaObjetos');
+      ul.innerHTML = '';
+      (data.objetos||[]).forEach(o=>{
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        const left = document.createElement('div');
+        left.innerHTML = `<div class="fw-semibold">${o.nombre}</div><div class="text-muted">${o.categoria||'-'} · ${o.fecha_creacion||''}</div>`;
+        const right = document.createElement('div');
+        right.innerHTML = `<span class="badge bg-secondary" title="Cargando...">0/6</span>`;
+        right.style.minWidth = '56px';
+        li.appendChild(left);
+        li.appendChild(right);
+        // Fetch vistas status
+        fetch(`/api/objetos/${o.id}/vistas_status`).then(r=>r.json()).then(v=>{
+          const count = v.count||0;
+          const missing = (v.missing||[]);
+          const badge = right.querySelector('span');
+          badge.textContent = `${count}/6`;
+          badge.className = count===6? 'badge bg-success':'badge bg-warning text-dark';
+          badge.title = missing.length? `Faltan: ${missing.join(', ')}`:'Completo';
+        }).catch(()=>{
+          const badge = right.querySelector('span');
+          badge.textContent = '—';
+          badge.className = 'badge bg-secondary';
+          badge.title = 'Error consultando vistas';
+        });
+        // Agregar botón de ver detalles
+        const btnVer = document.createElement('button');
+        btnVer.className = 'btn btn-sm btn-outline-primary me-2';
+        btnVer.innerHTML = '<i class="bi bi-eye"></i>';
+        btnVer.title = 'Ver detalles e imágenes';
+        btnVer.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          verDetallesObjeto(o.id);
+        });
+        right.insertBefore(btnVer, right.firstChild);
+        
+        li.addEventListener('click', ()=>{
+          currentObjetoId = o.id;
+          document.getElementById('objNombre').value = o.nombre;
+          document.getElementById('objCategoria').value = o.categoria||'';
+          document.getElementById('imgCarpeta').value = o.nombre; // Pre-llenar carpeta con nombre del objeto
+          // Detectar tipo basado en categoría para pre-seleccionar radio
+          const esEquipo = ['optica', 'electronico', 'mecanico', 'medicion', 'analisis'].some(t => (o.categoria||'').toLowerCase().includes(t));
+          document.getElementById(esEquipo ? 'radioEquipo' : 'radioObjeto').checked = true;
+        });
+        ul.appendChild(li);
+      });
+    }catch(e){ console.warn(e); }
+  }
+  document.getElementById('buscarObj').addEventListener('input', (e)=>cargarObjetos(e.target.value));
+  
+  // Función para ver detalles del objeto con imágenes
+  async function verDetallesObjeto(objetoId){
+    try{
+      console.log('[DEBUG] Cargando detalles del objeto:', objetoId);
+      const res = await api(`/api/objetos/${objetoId}`);
+      console.log('[DEBUG] Respuesta recibida:', res.status);
+      
+      if(!res.ok){
+        const errorText = await res.text();
+        console.error('[ERROR] Error en respuesta:', errorText);
+        alert('Error al cargar objeto: ' + errorText);
+        return;
+      }
+      
+      const data = await res.json();
+      console.log('[DEBUG] Datos del objeto:', data);
+      const objeto = data.objeto || data;
+      
+      // Obtener imágenes
+      const resImg = await api(`/api/objetos/${objetoId}/imagenes`);
+      const dataImg = await resImg.json();
+      const imagenes = dataImg.imagenes || [];
+      
+      // Crear modal
+      const modal = document.createElement('div');
+      modal.className = 'modal fade';
+      modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i>${objeto.nombre}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <p><strong>Categoría:</strong> ${objeto.categoria || 'Sin categoría'}</p>
+                  <p><strong>Descripción:</strong> ${objeto.descripcion || 'Sin descripción'}</p>
+                  <p><strong>Fecha de creación:</strong> ${objeto.fecha_creacion || '-'}</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Total de imágenes:</strong> ${imagenes.length}</p>
+                  <p><strong>ID:</strong> ${objeto.id}</p>
+                </div>
+              </div>
+              <h6 class="mb-3">Imágenes del objeto:</h6>
+              <div class="row g-3" id="imagenesGrid">
+                ${imagenes.length === 0 ? '<p class="text-muted">No hay imágenes registradas</p>' : ''}
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      
+      // Cargar imágenes
+      const grid = modal.querySelector('#imagenesGrid');
+      imagenes.forEach(img => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4';
+        col.innerHTML = `
+          <div class="card">
+            <img src="/imagenes_objeto/${img.id}" class="card-img-top" alt="${img.vista || 'Imagen'}" style="height: 200px; object-fit: cover;">
+            <div class="card-body p-2">
+              <p class="mb-1 small"><strong>Vista:</strong> ${img.vista || 'No especificada'}</p>
+              <p class="mb-0 small text-muted">${img.notas || ''}</p>
+            </div>
+          </div>
+        `;
+        grid.appendChild(col);
+      });
+      
+      // Mostrar modal
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+      
+      // Limpiar al cerrar
+      modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+      });
+    }catch(e){
+      console.error(e);
+      alert('Error cargando detalles del objeto');
+    }
+  }
+  
+  cargarObjetos();
+})();
+</script>
+
+<!-- Modal: Instrucciones de Permisos -->
+<div class="modal fade" id="modalPermisos" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title"><i class="bi bi-camera-video me-2"></i>Cómo Habilitar Permisos de Cámara</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Importante:</strong> El navegador necesita tu permiso explícito para acceder a la cámara por razones de seguridad.
+        </div>
+
+        <h6 class="fw-bold mb-3">📋 Pasos para Habilitar la Cámara:</h6>
+        
+        <div class="accordion" id="accordionPermisos">
+          <!-- Chrome/Edge -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#chrome">
+                <i class="bi bi-browser-chrome me-2"></i>Google Chrome / Microsoft Edge
+              </button>
+            </h2>
+            <div id="chrome" class="accordion-collapse collapse show" data-bs-parent="#accordionPermisos">
+              <div class="accordion-body">
+                <ol>
+                  <li>Haz clic en el botón <strong>"Activar Cámara"</strong></li>
+                  <li>Aparecerá una ventana emergente en la parte superior del navegador</li>
+                  <li>Haz clic en <strong>"Permitir"</strong> o <strong>"Allow"</strong></li>
+                  <li>La cámara se activará automáticamente</li>
+                </ol>
+                
+                <div class="alert alert-warning mt-3">
+                  <strong>Si bloqueaste el acceso por error:</strong>
+                  <ol class="mb-0 mt-2">
+                    <li>Haz clic en el icono 🔒 o <i class="bi bi-lock-fill"></i> en la barra de direcciones</li>
+                    <li>Busca "Cámara" en la lista de permisos</li>
+                    <li>Cambia de "Bloquear" a <strong>"Permitir"</strong></li>
+                    <li>Recarga la página (F5)</li>
+                    <li>Intenta activar la cámara nuevamente</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Firefox -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#firefox">
+                <i class="bi bi-browser-firefox me-2"></i>Mozilla Firefox
+              </button>
+            </h2>
+            <div id="firefox" class="accordion-collapse collapse" data-bs-parent="#accordionPermisos">
+              <div class="accordion-body">
+                <ol>
+                  <li>Haz clic en <strong>"Activar Cámara"</strong></li>
+                  <li>Aparecerá un mensaje en la parte superior</li>
+                  <li>Selecciona tu cámara del menú desplegable</li>
+                  <li>Haz clic en <strong>"Permitir"</strong></li>
+                </ol>
+                
+                <div class="alert alert-warning mt-3">
+                  <strong>Para cambiar permisos:</strong>
+                  <ol class="mb-0 mt-2">
+                    <li>Haz clic en el icono <i class="bi bi-shield-check"></i> junto a la URL</li>
+                    <li>Haz clic en "Más información"</li>
+                    <li>Ve a la pestaña "Permisos"</li>
+                    <li>Busca "Usar la cámara" y marca "Permitir"</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Safari -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#safari">
+                <i class="bi bi-browser-safari me-2"></i>Safari (macOS)
+              </button>
+            </h2>
+            <div id="safari" class="accordion-collapse collapse" data-bs-parent="#accordionPermisos">
+              <div class="accordion-body">
+                <ol>
+                  <li>Haz clic en <strong>"Activar Cámara"</strong></li>
+                  <li>Safari mostrará una ventana de diálogo</li>
+                  <li>Haz clic en <strong>"Permitir"</strong></li>
+                </ol>
+                
+                <div class="alert alert-warning mt-3">
+                  <strong>Configuración del sistema:</strong>
+                  <ol class="mb-0 mt-2">
+                    <li>Ve a <strong>Preferencias del Sistema</strong> > <strong>Seguridad y Privacidad</strong></li>
+                    <li>Selecciona la pestaña <strong>"Cámara"</strong></li>
+                    <li>Asegúrate de que Safari esté marcado</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-success mt-4">
+          <i class="bi bi-check-circle me-2"></i>
+          <strong>Consejo:</strong> Si la cámara no funciona después de dar permisos, intenta:
+          <ul class="mb-0 mt-2">
+            <li>Cerrar otras aplicaciones que usen la cámara (Zoom, Teams, Skype)</li>
+            <li>Recargar la página (F5)</li>
+            <li>Reiniciar el navegador</li>
+            <li>Verificar que tu cámara esté conectada correctamente</li>
+          </ul>
+        </div>
+
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>Nota de Seguridad:</strong> Solo otorga permisos de cámara a sitios web de confianza. Este sistema es del Centro Minero SENA y es completamente seguro.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="document.getElementById('btnAbrirCam').click()">
+          <i class="bi bi-camera-video me-2"></i>Intentar Activar Cámara
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

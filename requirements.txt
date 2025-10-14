@@ -1,0 +1,55 @@
+# =============================
+# SISTEMA DE LABORATORIOS - CENTRO MINERO SENA
+# Dependencias Esenciales y Funcionales
+# =============================
+
+# Framework Web
+Flask==3.0.3
+flask-restful==0.3.10
+flask-jwt-extended==4.6.0
+flask-cors==4.0.0
+
+# Base de datos
+mysql-connector-python==8.1.0
+
+# Configuración
+python-dotenv==1.0.1
+
+# Procesamiento de imágenes y visión computacional
+opencv-python==4.8.1.78
+Pillow==10.0.1
+numpy==1.24.3
+
+# Reconocimiento Facial
+face-recognition==1.3.0
+dlib==19.24.2
+
+# Reconocimiento de voz y síntesis
+SpeechRecognition==3.10.0
+pyttsx3==2.90
+# Nota: En Windows, SpeechRecognition suele requerir PyAudio.
+# Si falla la instalación, pruebe:
+#   pip install pipwin
+#   pipwin install pyaudio
+
+# IA Avanzada - Reconocimiento de Voz
+deepspeech==0.9.3
+webrtcvad==2.0.10
+# pyaudio==0.2.11  # Descomentar si necesitas captura de audio en tiempo real
+
+# IA Avanzada - Visión por Computadora
+tensorflow==2.13.0
+# tflite-runtime==2.13.0  # Alternativa ligera a TensorFlow completo
+scikit-image==0.21.0
+
+# Utilidades adicionales para IA
+librosa==0.10.1
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# Utilidades de fecha y tiempo
+python-dateutil==2.9.0.post0
+pytz==2025.2
+
+# Monitoreo del sistema
+psutil==5.9.8

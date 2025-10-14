@@ -1,0 +1,25 @@
+{
+  "id": 8,
+  "nombre": "Mano Valdelamar v2",
+  "tipo": "equipo",
+  "categoria": "Guantes",
+  "descripcion": "nn",
+  "ubicacion": "Estante 3",
+  "laboratorio_id": 1,
+  "laboratorio_nombre": "Mantenimiento General",
+  "laboratorio_ubicacion": "Edificio Principal - Piso 1",
+  "cantidad": null,
+  "estado": "disponible",
+  "equipo_id": "EQ_51E0BA8C",
+  "fotos_capturadas": [
+    "frontal",
+    "posterior",
+    "superior",
+    "inferior",
+    "lateral_derecha",
+    "lateral_izquierda"
+  ],
+  "total_fotos": 6,
+  "entrenado_ia": true,
+  "ruta_imagenes": "imagenes\\equipo\\mano_valdelamar_v2"
+}

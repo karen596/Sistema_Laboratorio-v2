@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Registros - Centro Minero SENA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-folder-check me-2"></i>Gestión de Registros</h2>
+                <a href="{{ url_for('registro_completo') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Nuevo Registro
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Tipo</label>
+                    <select class="form-select" id="filtroTipo">
+                        <option value="">Todos</option>
+                        <option value="equipo">Equipos</option>
+                        <option value="item">Items</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoría</label>
+                    <select class="form-select" id="filtroCategoria">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Laboratorio</label>
+                    <select class="form-select" id="filtroLaboratorio">
+                        <option value="">Todos</option>
+                        {% for lab in laboratorios %}
+                        <option value="{{ lab.id }}">{{ lab.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="buscar" placeholder="Nombre del objeto...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="registrosTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="equipos-tab" data-bs-toggle="tab" data-bs-target="#equipos" type="button">
+                <i class="bi bi-cpu me-2"></i>Equipos (<span id="countEquipos">0</span>)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button">
+                <i class="bi bi-box-seam me-2"></i>Items (<span id="countItems">0</span>)
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de Tabs -->
+    <div class="tab-content" id="registrosTabContent">
+        <!-- Tab Equipos -->
+        <div class="tab-pane fade show active" id="equipos" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Foto</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Laboratorio</th>
+                                    <th>Estado</th>
+                                    <th>IA</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaEquipos">
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Items -->
+        <div class="tab-pane fade" id="items" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Foto</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Laboratorio</th>
+                                    <th>Stock</th>
+                                    <th>IA</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaItems">
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Detalles -->
+<div class="modal fade" id="modalDetalles" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles del Registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detallesContenido">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let registros = [];
+
+// Cargar registros al iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    cargarRegistros();
+});
+
+// Cargar registros desde el servidor
+async function cargarRegistros() {
+    try {
+        const response = await fetch('/api/registros-completos');
+        const data = await response.json();
+        
+        if (data.success) {
+            registros = data.registros;
+            actualizarTablas();
+        }
+    } catch (error) {
+        console.error('Error cargando registros:', error);
+    }
+}
+
+// Actualizar tablas
+function actualizarTablas() {
+    const equipos = registros.filter(r => r.tipo === 'equipo');
+    const items = registros.filter(r => r.tipo === 'item');
+    
+    document.getElementById('countEquipos').textContent = equipos.length;
+    document.getElementById('countItems').textContent = items.length;
+    
+    renderTablaEquipos(equipos);
+    renderTablaItems(items);
+}
+
+// Render tabla equipos
+function renderTablaEquipos(equipos) {
+    const tbody = document.getElementById('tablaEquipos');
+    
+    if (equipos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay equipos registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = equipos.map(eq => `
+        <tr>
+            <td>
+                ${eq.foto_frontal ? 
+                    `<img src="${eq.foto_frontal}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` :
+                    '<i class="bi bi-image" style="font-size: 2rem;"></i>'
+                }
+            </td>
+            <td><strong>${eq.nombre}</strong></td>
+            <td><span class="badge bg-secondary">${eq.categoria}</span></td>
+            <td>${eq.laboratorio_nombre || 'N/A'}</td>
+            <td>
+                ${eq.estado === 'disponible' ? '<span class="badge bg-success">Disponible</span>' :
+                  eq.estado === 'en_uso' ? '<span class="badge bg-primary">En Uso</span>' :
+                  eq.estado === 'mantenimiento' ? '<span class="badge bg-warning">Mantenimiento</span>' :
+                  '<span class="badge bg-danger">Fuera de Servicio</span>'}
+            </td>
+            <td>
+                ${eq.entrenado_ia ? 
+                    '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Entrenado</span>' :
+                    '<span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Parcial</span>'
+                }
+            </td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="verDetalles(${eq.id}, 'equipo')">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="editarRegistro(${eq.id}, 'equipo')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarRegistro(${eq.id}, 'equipo')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Render tabla items
+function renderTablaItems(items) {
+    const tbody = document.getElementById('tablaItems');
+    
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hay items registrados</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = items.map(item => `
+        <tr>
+            <td>
+                ${item.foto_frontal ? 
+                    `<img src="${item.foto_frontal}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">` :
+                    '<i class="bi bi-image" style="font-size: 2rem;"></i>'
+                }
+            </td>
+            <td><strong>${item.nombre}</strong></td>
+            <td><span class="badge bg-secondary">${item.categoria}</span></td>
+            <td>${item.laboratorio_nombre || 'N/A'}</td>
+            <td><strong>${item.stock_actual || 0}</strong> unidades</td>
+            <td>
+                ${item.entrenado_ia ? 
+                    '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Entrenado</span>' :
+                    '<span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Parcial</span>'
+                }
+            </td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="verDetalles(${item.id}, 'item')">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="editarRegistro(${item.id}, 'item')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarRegistro(${item.id}, 'item')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Ver detalles
+async function verDetalles(id, tipo) {
+    try {
+        const response = await fetch(`/api/registro-detalle/${tipo}/${id}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarModalDetalles(data.registro);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Mostrar modal con detalles
+function mostrarModalDetalles(registro) {
+    const contenido = document.getElementById('detallesContenido');
+    
+    contenido.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Información General</h6>
+                <p><strong>Nombre:</strong> ${registro.nombre}</p>
+                <p><strong>Categoría:</strong> ${registro.categoria}</p>
+                <p><strong>Descripción:</strong> ${registro.descripcion || 'N/A'}</p>
+                <p><strong>Ubicación:</strong> ${registro.ubicacion || 'N/A'}</p>
+                ${registro.tipo === 'equipo' ? 
+                    `<p><strong>Estado:</strong> ${registro.estado}</p>` :
+                    `<p><strong>Stock:</strong> ${registro.stock_actual} unidades</p>`
+                }
+            </div>
+            <div class="col-md-6">
+                <h6>Fotos Capturadas</h6>
+                <div class="row g-2">
+                    ${registro.fotos.map(foto => `
+                        <div class="col-4">
+                            <img src="${foto.path}" class="img-fluid rounded" alt="${foto.vista}">
+                            <small class="d-block text-center">${foto.vista}</small>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('modalDetalles')).show();
+}
+
+// Editar registro
+function editarRegistro(id, tipo) {
+    alert(`Editar ${tipo} ID: ${id} - Funcionalidad próximamente`);
+}
+
+// Eliminar registro
+async function eliminarRegistro(id, tipo) {
+    if (!confirm('¿Está seguro de eliminar este registro?')) return;
+    
+    try {
+        const response = await fetch(`/api/registro-eliminar/${tipo}/${id}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ Registro eliminado exitosamente');
+            cargarRegistros();
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('❌ Error al eliminar: ' + error.message);
+    }
+}
+
+// Filtros
+document.getElementById('filtroTipo').addEventListener('change', aplicarFiltros);
+document.getElementById('filtroCategoria').addEventListener('change', aplicarFiltros);
+document.getElementById('filtroLaboratorio').addEventListener('change', aplicarFiltros);
+document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+
+function aplicarFiltros() {
+    // Implementar filtrado
+    const tipo = document.getElementById('filtroTipo').value;
+    const categoria = document.getElementById('filtroCategoria').value;
+    const laboratorio = document.getElementById('filtroLaboratorio').value;
+    const buscar = document.getElementById('buscar').value.toLowerCase();
+    
+    let filtrados = registros.filter(r => {
+        if (tipo && r.tipo !== tipo) return false;
+        if (categoria && r.categoria !== categoria) return false;
+        if (laboratorio && r.laboratorio_id != laboratorio) return false;
+        if (buscar && !r.nombre.toLowerCase().includes(buscar)) return false;
+        return true;
+    });
+    
+    actualizarTablas();
+}
+</script>
+
+{% endblock %}

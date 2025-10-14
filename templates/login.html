@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Centro Minero SENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 50%, #14532d 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            color: #2d6a4f !important;
+            font-size: 1.3em;
+            letter-spacing: -0.02em;
+        }
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .login-header {
+            background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .login-header h2 {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 10px;
+        }
+        .login-header p {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        .login-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5em;
+            color: #2d6a4f;
+            position: relative;
+            z-index: 1;
+        }
+        .login-body {
+            padding: 40px 30px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #1e5128;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #2d6a4f;
+            box-shadow: 0 0 0 0.2rem rgba(45, 106, 79, 0.15);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            background: linear-gradient(135deg, #1e5128 0%, #14532d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+            color: white;
+        }
+        .btn-facial {
+            background: white;
+            border: 2px solid #2d6a4f;
+            color: #2d6a4f;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-facial:hover {
+            background: #2d6a4f;
+            color: white;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .forgot-password a {
+            color: #2d6a4f;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .forgot-password a:hover {
+            color: #1e5128;
+            text-decoration: underline;
+        }
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            text-align: center;
+            color: #666;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        .footer-links a {
+            color: #2d6a4f;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+        }
+        .footer-links a:hover {
+            color: #1e5128;
+        }
+        .feature-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .feature-box:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            color: #2d6a4f;
+            margin-bottom: 15px;
+        }
+        .info-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .bg-sena {
+            background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%) !important;
+        }
+        .text-sena {
+            color: #2d6a4f !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-flower2 me-2"></i>Centro Minero SENA
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalAcercaDe">
+                            <i class="bi bi-info-circle me-1"></i>Acerca de
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalContacto">
+                            <i class="bi bi-telephone me-1"></i>Contacto
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalAyuda">
+                            <i class="bi bi-question-circle me-1"></i>Ayuda
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Columna Izquierda: Información -->
+                <div class="col-lg-6 text-white mb-4 mb-lg-0">
+                    <h1 class="display-4 fw-bold mb-4">Sistema de Gestión de Laboratorios</h1>
+                    <p class="lead mb-4">Centro Minero SENA - Regional Boyacá</p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <div class="feature-icon">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <h5>Seguro y Confiable</h5>
+                                <p class="small mb-0">Autenticación con reconocimiento facial</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <div class="feature-icon">
+                                    <i class="bi bi-laptop"></i>
+                                </div>
+                                <h5>Gestión Inteligente</h5>
+                                <p class="small mb-0">Control de equipos y recursos</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <div class="feature-icon">
+                                    <i class="bi bi-calendar-check"></i>
+                                </div>
+                                <h5>Reservas Fáciles</h5>
+                                <p class="small mb-0">Programa tus prácticas de laboratorio</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-box">
+                                <div class="feature-icon">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                                <h5>Reportes en Tiempo Real</h5>
+                                <p class="small mb-0">Estadísticas y análisis completos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna Derecha: Login -->
+                <div class="col-lg-6">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2>Bienvenido</h2>
+                <p>Sistema de Gestión de Laboratorios</p>
+            </div>
+            
+            <div class="login-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category=='error' else category }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">
+                            <i class="bi bi-person-badge me-2"></i>Usuario
+                        </label>
+                        <input type="text" class="form-control" id="user_id" name="user_id" 
+                               placeholder="Ej: INST001" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-key me-2"></i>Contraseña
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Ingresa tu contraseña" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-9">
+                            <button type="submit" class="btn-login">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <button type="button" class="btn btn-facial w-100" title="Reconocimiento Facial">
+                                <i class="bi bi-camera-video"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="{{ url_for('recuperar_contrasena') }}">
+                            <i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                    
+                    <div class="text-center mt-3 pt-3" style="border-top: 1px solid #e9ecef;">
+                        <p class="mb-2 text-muted">¿No tienes una cuenta?</p>
+                        <a href="{{ url_for('registro') }}" class="btn btn-outline-success">
+                            <i class="bi bi-person-plus me-2"></i>Registrarse
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links mb-3">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalPrivacidad">
+                    <i class="bi bi-shield-check me-1"></i>Política de Privacidad
+                </a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalTerminos">
+                    <i class="bi bi-file-text me-1"></i>Términos de Uso
+                </a>
+                <a href="#" data-bs-toggle="modal" data-bs-target="#modalAccesibilidad">
+                    <i class="bi bi-universal-access me-1"></i>Accesibilidad
+                </a>
+            </div>
+            <p class="mb-0">
+                <i class="bi bi-c-circle me-1"></i>2025 Centro Minero SENA - Todos los derechos reservados
+            </p>
+            <small class="text-muted">Sistema de Gestión de Laboratorios v1.0</small>
+        </div>
+    </footer>
+
+    <!-- Modal para Reconocimiento Facial -->
+    <div class="modal fade" id="facialModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-camera-video me-2"></i>Reconocimiento Facial</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <video id="video" width="400" height="300" autoplay style="border-radius: 10px; border: 3px solid #2d6a4f;"></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-success" id="captureBtn">
+                            <i class="bi bi-camera me-2"></i>Capturar y Autenticar
+                        </button>
+                    </div>
+                    <div id="facialStatus" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales Informativos -->
+    <!-- Modal: Acerca de -->
+    <div class="modal fade" id="modalAcercaDe" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-sena text-white">
+                    <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Acerca de Nosotros</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-flower2" style="font-size: 4rem; color: #2d6a4f;"></i>
+                        <h4 class="mt-3">Centro Minero SENA</h4>
+                        <p class="text-muted">Regional Boyacá</p>
+                    </div>
+                    <p>El Centro Minero del SENA es una institución líder en la formación profesional integral en el sector minero y energético de Colombia.</p>
+                    <h6 class="fw-bold text-sena mt-4">Sistema de Gestión de Laboratorios</h6>
+                    <p>Plataforma moderna para la administración eficiente de recursos educativos, equipos y espacios de laboratorio.</p>
+                    <ul>
+                        <li>Control de acceso con reconocimiento facial</li>
+                        <li>Gestión inteligente de equipos e inventario</li>
+                        <li>Reservas automatizadas</li>
+                        <li>Reportes en tiempo real</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Contacto -->
+    <div class="modal fade" id="modalContacto" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-sena text-white">
+                    <h5 class="modal-title"><i class="bi bi-envelope me-2"></i>Contacto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <i class="bi bi-geo-alt text-sena me-2"></i>
+                        <strong>Ubicación:</strong><br>
+                        <span class="ms-4">Centro Minero SENA<br>Sogamoso, Boyacá, Colombia</span>
+                    </div>
+                    <div class="mb-3">
+                        <i class="bi bi-telephone text-sena me-2"></i>
+                        <strong>Teléfono:</strong><br>
+                        <span class="ms-4">(604) 444 0400</span>
+                    </div>
+                    <div class="mb-3">
+                        <i class="bi bi-envelope text-sena me-2"></i>
+                        <strong>Correo:</strong><br>
+                        <span class="ms-4"><a href="mailto:gilcentrominero@gmail.com">gilcentrominero@gmail.com</a></span>
+                    </div>
+                    <div class="mb-3">
+                        <i class="bi bi-clock text-sena me-2"></i>
+                        <strong>Horario:</strong><br>
+                        <span class="ms-4">Lunes a Viernes, 7:00 AM - 5:00 PM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Ayuda -->
+    <div class="modal fade" id="modalAyuda" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-sena text-white">
+                    <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Ayuda</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold">¿Cómo iniciar sesión?</h6>
+                    <ol>
+                        <li>Ingresa tu ID de usuario (Ej: INST001, APRE001)</li>
+                        <li>Ingresa tu contraseña</li>
+                        <li>Haz clic en "Iniciar Sesión"</li>
+                    </ol>
+                    <h6 class="fw-bold mt-4">Reconocimiento Facial</h6>
+                    <p>Puedes usar el botón de cámara para autenticarte mediante reconocimiento facial. Asegúrate de tener buena iluminación.</p>
+                    <h6 class="fw-bold mt-4">¿Olvidaste tu contraseña?</h6>
+                    <p>Haz clic en "¿Olvidaste tu contraseña?" y sigue las instrucciones para recuperarla por correo electrónico.</p>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Para más ayuda, contacta al administrador del sistema.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Privacidad -->
+    <div class="modal fade" id="modalPrivacidad" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-sena text-white">
+                    <h5 class="modal-title"><i class="bi bi-shield-check me-2"></i>Política de Privacidad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Última actualización: Octubre 2025</p>
+                    <h6 class="fw-bold">Información que Recopilamos</h6>
+                    <ul>
+                        <li>Datos de identificación personal</li>
+                        <li>Datos biométricos (reconocimiento facial)</li>
+                        <li>Registros de uso del sistema</li>
+                    </ul>
+                    <h6 class="fw-bold mt-3">Uso de la Información</h6>
+                    <p>La información se utiliza exclusivamente para la gestión de laboratorios y control de acceso.</p>
+                    <h6 class="fw-bold mt-3">Protección de Datos</h6>
+                    <p>Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos personales.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Términos -->
+    <div class="modal fade" id="modalTerminos" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-sena text-white">
+                    <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Términos de Uso</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Última actualización: Octubre 2025</p>
+                    <h6 class="fw-bold">Aceptación de Términos</h6>
+                    <p>Al acceder al sistema, aceptas estar sujeto a estos términos y condiciones.</p>
+                    <h6 class="fw-bold mt-3">Uso Autorizado</h6>
+                    <p>El sistema está destinado exclusivamente para aprendices, instructores y personal autorizado del SENA.</p>
+                    <h6 class="fw-bold mt-3">Responsabilidades</h6>
+                    <ul>
+                        <li>Mantener la confidencialidad de tus credenciales</li>
+                        <li>Usar el sistema solo para fines educativos</li>
+                        <li>Reportar cualquier problema de seguridad</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Accesibilidad -->
+    <div class="modal fade" id="modalAccesibilidad" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-universal-access me-2"></i>Accesibilidad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>El sistema incluye opciones de accesibilidad para garantizar que todos los usuarios puedan utilizarlo:</p>
+                    <ul>
+                        <li><strong>Alto Contraste:</strong> Mejora la visibilidad del texto</li>
+                        <li><strong>Tamaño de Texto:</strong> Ajustable de 80% a 200%</li>
+                        <li><strong>Navegación por Teclado:</strong> Compatible con lectores de pantalla</li>
+                        <li><strong>Comandos de Voz:</strong> Control por voz disponible</li>
+                    </ul>
+                    <p class="mt-3">Estas opciones estarán disponibles una vez inicies sesión.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const facialBtn = document.querySelector('.btn-facial');
+        const facialModal = new bootstrap.Modal(document.getElementById('facialModal'));
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('captureBtn');
+        const facialStatus = document.getElementById('facialStatus');
+        let stream = null;
+
+        // Abrir modal y activar cámara
+        facialBtn.addEventListener('click', async () => {
+            facialModal.show();
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                facialStatus.innerHTML = '<div class="alert alert-danger">Error al acceder a la cámara: ' + err.message + '</div>';
+            }
+        });
+
+        // Capturar imagen y autenticar
+        captureBtn.addEventListener('click', async () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg').split(',')[1];
+            
+            facialStatus.innerHTML = '<div class="spinner-border text-success" role="status"></div><p class="mt-2">Procesando...</p>';
+            
+            try {
+                const response = await fetch('/login_facial', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    facialStatus.innerHTML = '<div class="alert alert-success">¡Autenticación exitosa! Redirigiendo...</div>';
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } else {
+                    facialStatus.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+                }
+            } catch (err) {
+                facialStatus.innerHTML = '<div class="alert alert-danger">Error de conexión</div>';
+            }
+        });
+
+        // Detener cámara al cerrar modal
+        document.getElementById('facialModal').addEventListener('hidden.bs.modal', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            facialStatus.innerHTML = '';
+        });
+    </script>
+</body>
+</html>

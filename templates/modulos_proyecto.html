@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulos del Proyecto - Centro Minero SENA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 50%, #40916c 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modules-grid {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .module-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .module-card:hover::before {
+            left: 100%;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(30, 81, 40, 0.2);
+            border-color: #2d6a4f;
+        }
+
+        .module-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .module-card:hover .module-icon {
+            transform: rotate(360deg) scale(1.1);
+        }
+
+        .module-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #1e5128;
+            margin-bottom: 8px;
+        }
+
+        .module-description {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .footer-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #2d6a4f;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2d6a4f 0%, #40916c 100%);
+            width: 90%;
+            border-radius: 10px;
+            animation: progressAnimation 2s ease-out;
+        }
+
+        @keyframes progressAnimation {
+            from { width: 0; }
+            to { width: 90%; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Módulos del Proyecto</h1>
+            <p>Sistema de Gestión de Laboratorios - Centro Minero SENA</p>
+        </div>
+
+        <div class="modules-grid">
+            <!-- Módulo 1: Accesibilidad -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-universal-access"></i>
+                </div>
+                <div class="module-title">Accesibilidad</div>
+                <div class="module-description">
+                    Sistema completo de accesibilidad con alto contraste, tamaño de texto ajustable, modo oscuro y atajos de teclado.
+                </div>
+            </div>
+
+            <!-- Módulo 2: Login -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                </div>
+                <div class="module-title">Login</div>
+                <div class="module-description">
+                    Autenticación segura con sesiones, validación de credenciales y logs de acceso.
+                </div>
+            </div>
+
+            <!-- Módulo 3: Gestionar Usuarios -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="module-title">Gestionar Usuarios</div>
+                <div class="module-description">
+                    CRUD completo de usuarios con niveles de acceso, registro facial y gestión de perfiles.
+                </div>
+            </div>
+
+            <!-- Módulo 4: Recuperar Contraseña -->
+            <div class="module-card">
+                <span class="status-badge status-pending">⏳ Pendiente</span>
+                <div class="module-icon">
+                    <i class="bi bi-key"></i>
+                </div>
+                <div class="module-title">Recuperar Contraseña</div>
+                <div class="module-description">
+                    Sistema de recuperación de contraseña mediante correo electrónico con tokens de seguridad.
+                </div>
+            </div>
+
+            <!-- Módulo 5: Ayuda (Manual Usuario) -->
+            <div class="module-card">
+                <span class="status-badge status-pending">⏳ Pendiente</span>
+                <div class="module-icon">
+                    <i class="bi bi-question-circle"></i>
+                </div>
+                <div class="module-title">Ayuda (Manual Usuario)</div>
+                <div class="module-description">
+                    Documentación interactiva con guías paso a paso, FAQs y tutoriales en video.
+                </div>
+            </div>
+
+            <!-- Módulo 6: Búsqueda y Filtros -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <div class="module-title">Búsqueda y Filtros</div>
+                <div class="module-description">
+                    Búsqueda en tiempo real con filtros avanzados por categoría, estado y ubicación.
+                </div>
+            </div>
+
+            <!-- Módulo 7: Diseño Responsivo -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-phone"></i>
+                </div>
+                <div class="module-title">Diseño Responsivo</div>
+                <div class="module-description">
+                    Interfaz adaptable a todos los dispositivos: móviles, tablets y desktop.
+                </div>
+            </div>
+
+            <!-- Módulo 8: Backup Base de Datos -->
+            <div class="module-card">
+                <span class="status-badge status-pending">⏳ Pendiente</span>
+                <div class="module-icon">
+                    <i class="bi bi-database"></i>
+                </div>
+                <div class="module-title">Backup Base de Datos</div>
+                <div class="module-description">
+                    Sistema automatizado de respaldo y restauración de base de datos con programación.
+                </div>
+            </div>
+
+            <!-- Módulo 9: Editar Perfil -->
+            <div class="module-card">
+                <span class="status-badge status-pending">⏳ Pendiente</span>
+                <div class="module-icon">
+                    <i class="bi bi-person-gear"></i>
+                </div>
+                <div class="module-title">Editar Perfil</div>
+                <div class="module-description">
+                    Permite a los usuarios actualizar su información personal, foto y preferencias.
+                </div>
+            </div>
+
+            <!-- Módulo 10: Dashboard -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <div class="module-title">Dashboard</div>
+                <div class="module-description">
+                    Panel de control con métricas en tiempo real, gráficos y estadísticas del sistema.
+                </div>
+            </div>
+
+            <!-- Módulo 11: Gestión de Laboratorios -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="module-title">Gestión de Laboratorios</div>
+                <div class="module-description">
+                    Administración completa de laboratorios con capacidad, equipamiento y responsables.
+                </div>
+            </div>
+
+            <!-- Módulo 12: Gestión de Equipos -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <div class="module-title">Gestión de Equipos</div>
+                <div class="module-description">
+                    Control de equipos con seguimiento de mantenimiento, calibración y disponibilidad.
+                </div>
+            </div>
+
+            <!-- Módulo 13: Inventario -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="module-title">Inventario</div>
+                <div class="module-description">
+                    Gestión de materiales con alertas de stock crítico y control de vencimientos.
+                </div>
+            </div>
+
+            <!-- Módulo 14: Reservas -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-calendar-event"></i>
+                </div>
+                <div class="module-title">Reservas</div>
+                <div class="module-description">
+                    Sistema de reservas de equipos con calendario y notificaciones automáticas.
+                </div>
+            </div>
+
+            <!-- Módulo 15: Reportes -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div class="module-title">Reportes</div>
+                <div class="module-description">
+                    Generación de reportes detallados con exportación a PDF y Excel.
+                </div>
+            </div>
+
+            <!-- Módulo 16: API REST -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+                <div class="module-title">API REST</div>
+                <div class="module-description">
+                    API completa con autenticación JWT y endpoints documentados para integración.
+                </div>
+            </div>
+
+            <!-- Módulo 17: Reconocimiento Facial -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="module-title">Reconocimiento Facial</div>
+                <div class="module-description">
+                    Autenticación biométrica mediante reconocimiento facial con OpenCV.
+                </div>
+            </div>
+
+            <!-- Módulo 18: Comandos de Voz -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-mic"></i>
+                </div>
+                <div class="module-title">Comandos de Voz</div>
+                <div class="module-description">
+                    Control por voz para operaciones comunes usando procesamiento de lenguaje natural.
+                </div>
+            </div>
+
+            <!-- Módulo 19: Visión por Computadora -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-camera"></i>
+                </div>
+                <div class="module-title">Visión por Computadora</div>
+                <div class="module-description">
+                    Identificación automática de objetos y equipos mediante cámara.
+                </div>
+            </div>
+
+            <!-- Módulo 20: Logs de Seguridad -->
+            <div class="module-card">
+                <span class="status-badge status-completed">✓ Completado</span>
+                <div class="module-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="module-title">Logs de Seguridad</div>
+                <div class="module-description">
+                    Registro completo de todas las acciones del sistema para auditoría.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-stats">
+                <div class="stat-item">
+                    <div class="stat-number">20</div>
+                    <div class="stat-label">Módulos Totales</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Completados</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">90%</div>
+                    <div class="stat-label">Progreso</div>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+            <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                Centro Minero SENA - Sistema de Gestión de Laboratorios v1.0
+            </p>
+        </div>
+    </div>
+</body>
+</html>

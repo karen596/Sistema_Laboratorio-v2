@@ -1,0 +1,28 @@
+# =============================
+# DEPENDENCIAS BÁSICAS (SIN IA)
+# Sistema funcional sin reconocimiento facial
+# =============================
+
+# Framework Web
+Flask==3.0.3
+flask-restful==0.3.10
+flask-jwt-extended==4.6.0
+flask-cors==4.0.0
+
+# Base de datos
+mysql-connector-python==8.1.0
+
+# Configuración
+python-dotenv==1.0.1
+
+# Procesamiento de imágenes básico
+opencv-python==4.8.1.78
+Pillow==10.0.1
+numpy==1.24.3
+
+# Utilidades de fecha y tiempo
+python-dateutil==2.9.0.post0
+pytz==2025.2
+
+# Monitoreo del sistema
+psutil==5.9.8

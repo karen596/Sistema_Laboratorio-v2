@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Centro Minero SENA</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="d-flex">
+    <nav id="sidebar" class="sidebar bg-sena text-white p-3">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-flower2 fs-3 me-2 text-sena-accent"></i>
+        <span class="fw-bold">Centro Minero SENA</span>
+      </div>
+      <hr class="border-light opacity-25">
+      {% if user %}
+      <div class="small mb-3">
+        <div class="fw-semibold">{{ user.get('user_name') }}</div>
+        <div class="text-white-50">{{ user.get('user_type')|capitalize }} · Nivel {{ user.get('user_level') }}</div>
+      </div>
+      {% endif %}
+      <ul class="nav nav-pills flex-column gap-1">
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/dashboard' }}" href="{{ url_for('dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path.startswith('/laboratorio') }}" href="{{ url_for('laboratorios') }}"><i class="bi bi-building me-2"></i>Laboratorios</a></li>
+        
+        {% if user and user.get('user_level',0) >= 4 %}
+        <li class="nav-item">
+          <a class="nav-link text-white {{ 'active' if request.path=='/registro-completo' }}" href="{{ url_for('registro_completo') }}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 500;">
+            <i class="bi bi-plus-circle me-2"></i>Registrar Equipo/Item
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white {{ 'active' if request.path=='/registros-gestion' }}" href="{{ url_for('registros_gestion') }}">
+            <i class="bi bi-folder-check me-2"></i>Gestionar Registros
+          </a>
+        </li>
+        {% endif %}
+        
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/inventario' }}" href="{{ url_for('inventario') }}"><i class="bi bi-search me-2"></i>Buscador Global</a></li>
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/reservas' }}" href="{{ url_for('reservas') }}"><i class="bi bi-calendar-event me-2"></i>Reservas</a></li>
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/registro-facial' }}" href="{{ url_for('registro_facial') }}"><i class="bi bi-person-badge me-2"></i>Registro Facial</a></li>
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/entrenamiento-visual' }}" href="{{ url_for('entrenamiento_visual') }}"><i class="bi bi-robot me-2"></i>IA Visual</a></li>
+        {% if user and user.get('user_level',0) >= 3 %}
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/usuarios' }}" href="{{ url_for('usuarios') }}"><i class="bi bi-people me-2"></i>Usuarios</a></li>
+        {% endif %}
+        {% if user and user.get('user_level',0) >= 2 %}
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/reportes' }}" href="{{ url_for('reportes') }}"><i class="bi bi-graph-up me-2"></i>Reportes</a></li>
+        {% endif %}
+        
+        <hr class="border-light opacity-25 my-2">
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/perfil' }}" href="{{ url_for('perfil') }}"><i class="bi bi-person-circle me-2"></i>Mi Perfil</a></li>
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/ayuda' }}" href="{{ url_for('ayuda') }}"><i class="bi bi-question-circle me-2"></i>Ayuda</a></li>
+        
+        {% if user and user.get('user_level',0) >= 4 %}
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/backup' }}" href="{{ url_for('backup') }}"><i class="bi bi-database me-2"></i>Backup BD</a></li>
+        <li class="nav-item"><a class="nav-link text-white {{ 'active' if request.path=='/configuracion' }}" href="{{ url_for('configuracion') }}"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+        {% endif %}
+        
+        <li class="nav-item mt-2"><a class="nav-link text-white-50" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Salir</a></li>
+      </ul>
+      <div class="mt-auto small text-white-50 pt-4">v1.0 · SENA</div>
+    </nav>
+
+    <main class="flex-grow-1 d-flex flex-column" style="min-height: 100vh;">
+      <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+        <div class="container-fluid">
+          <button class="btn btn-outline-sena d-lg-none" id="toggleSidebar"><i class="bi bi-list"></i></button>
+          <span class="navbar-brand fw-semibold">{{ title or 'Sistema de Laboratorios' }}</span>
+          <div class="ms-auto d-flex align-items-center gap-2">
+            <span class="small text-muted d-none d-md-inline" id="apiJwtStatus">API: sin sesión</span>
+            <button class="btn btn-outline-sena" id="btnApiLoginOpen" title="Iniciar sesión API" data-bs-toggle="tooltip" data-bs-placement="bottom">
+              <i class="bi bi-key"></i>
+            </button>
+            <button class="btn btn-outline-sena" id="btnVoice" title="Comandos de voz - Haz clic para activar/desactivar" data-bs-toggle="tooltip" data-bs-placement="bottom">
+              <i class="bi bi-mic"></i>
+            </button>
+            <button class="btn btn-outline-info" id="btnAyudaMicrofono" title="Ayuda con micrófono" data-bs-toggle="modal" data-bs-target="#modalAyudaMicrofono">
+              <i class="bi bi-question-circle"></i>
+            </button>
+            <button class="btn btn-outline-primary" id="btnAccesibilidad" title="Opciones de Accesibilidad" data-bs-toggle="modal" data-bs-target="#modalAccesibilidad">
+              <i class="bi bi-universal-access"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="container-fluid p-3 p-md-4 flex-grow-1">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'warning' if category=='error' else category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+      
+      <!-- Footer Estático -->
+      <footer class="bg-white border-top mt-auto">
+        <div class="container-fluid py-4">
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <h6 class="fw-bold text-sena">Centro Minero SENA</h6>
+              <p class="small text-muted mb-2">Sistema de Gestión de Laboratorios</p>
+              <p class="small text-muted">Optimizando la administración de recursos educativos</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6 class="fw-bold">Enlaces Rápidos</h6>
+              <ul class="list-unstyled small">
+                <li><a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                <li><a href="{{ url_for('ayuda') }}" class="text-decoration-none text-muted"><i class="bi bi-question-circle me-1"></i>Ayuda</a></li>
+                <li><a href="{{ url_for('perfil') }}" class="text-decoration-none text-muted"><i class="bi bi-person-circle me-1"></i>Mi Perfil</a></li>
+                {% if user and user.get('user_level',0) >= 4 %}
+                <li><a href="{{ url_for('backup') }}" class="text-decoration-none text-muted"><i class="bi bi-database me-1"></i>Backup</a></li>
+                {% endif %}
+              </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h6 class="fw-bold">Información</h6>
+              <ul class="list-unstyled small">
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalAcercaDe" class="text-decoration-none text-muted"><i class="bi bi-info-circle me-1"></i>Acerca de Nosotros</a></li>
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalContacto" class="text-decoration-none text-muted"><i class="bi bi-envelope me-1"></i>Contacto</a></li>
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalPrivacidad" class="text-decoration-none text-muted"><i class="bi bi-shield-check me-1"></i>Política de Privacidad</a></li>
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalTerminos" class="text-decoration-none text-muted"><i class="bi bi-file-text me-1"></i>Términos de Uso</a></li>
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalAccesibilidad" class="text-decoration-none text-muted"><i class="bi bi-universal-access me-1"></i>Accesibilidad</a></li>
+              </ul>
+            </div>
+          </div>
+          <hr class="my-3">
+          <div class="row">
+            <div class="col-md-6 text-center text-md-start">
+              <small class="text-muted">
+                <i class="bi bi-c-circle me-1"></i>2025 Centro Minero SENA - Todos los derechos reservados
+              </small>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+              <small class="text-muted">
+                Sistema v1.0 | Desarrollado con <i class="bi bi-heart-fill text-danger"></i>
+              </small>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Modal: Login API JWT -->
+  <div class="modal fade" id="modalApiLogin" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-key me-2"></i>Iniciar sesión API</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">ID de usuario</label>
+            <input type="text" class="form-control" id="apiUserId" placeholder="Ej: INST001">
+            <div class="form-text">Se usará para obtener un token JWT y habilitar acciones de API.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button class="btn btn-sena" id="btnApiLogin">Iniciar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Acerca de Nosotros -->
+  <div class="modal fade" id="modalAcercaDe" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-gradient text-white border-0" style="background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);">
+          <h5 class="modal-title"><i class="bi bi-info-circle me-2 animate-pulse"></i>Acerca de Nosotros</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="text-center mb-4 animate-fade-in">
+            <div class="icon-circle mx-auto mb-3">
+              <i class="bi bi-flower2 text-white" style="font-size: 3rem;"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Centro Minero SENA</h4>
+            <span class="badge bg-sena px-3 py-2">Regional Boyacá</span>
+          </div>
+          
+          <div class="info-card mb-3">
+            <div class="d-flex align-items-center mb-2">
+              <div class="icon-badge bg-sena me-3">
+                <i class="bi bi-bullseye text-white"></i>
+              </div>
+              <h6 class="fw-bold text-sena mb-0">Nuestra Misión</h6>
+            </div>
+            <p class="text-muted ps-5">El Centro Minero del SENA es una institución líder en la formación profesional integral en el sector minero y energético de Colombia. Nos dedicamos a formar talento humano competente y competitivo que contribuya al desarrollo sostenible del país.</p>
+          </div>
+          
+          <div class="info-card mb-3">
+            <div class="d-flex align-items-center mb-2">
+              <div class="icon-badge bg-primary me-3">
+                <i class="bi bi-laptop text-white"></i>
+              </div>
+              <h6 class="fw-bold text-sena mb-0">Sistema de Gestión de Laboratorios</h6>
+            </div>
+            <p class="text-muted ps-5 mb-2">Este sistema ha sido desarrollado para optimizar la administración de recursos educativos:</p>
+            <ul class="feature-list ps-5">
+              <li><i class="bi bi-check-circle-fill text-success me-2"></i>Gestión eficiente de equipos e inventario</li>
+              <li><i class="bi bi-check-circle-fill text-success me-2"></i>Control de acceso con reconocimiento facial</li>
+              <li><i class="bi bi-check-circle-fill text-success me-2"></i>Reservas automatizadas de equipos y espacios</li>
+              <li><i class="bi bi-check-circle-fill text-success me-2"></i>Trazabilidad completa de uso de recursos</li>
+              <li><i class="bi bi-check-circle-fill text-success me-2"></i>Reportes en tiempo real para toma de decisiones</li>
+            </ul>
+          </div>
+          
+          <div class="info-card mb-3">
+            <div class="d-flex align-items-center mb-2">
+              <div class="icon-badge bg-info me-3">
+                <i class="bi bi-cpu text-white"></i>
+              </div>
+              <h6 class="fw-bold text-sena mb-0">Tecnología e Innovación</h6>
+            </div>
+            <p class="text-muted ps-5">Implementamos tecnologías de vanguardia como inteligencia artificial, reconocimiento facial y visual, para brindar una experiencia moderna y segura a nuestros aprendices e instructores.</p>
+          </div>
+          
+          <div class="version-badge">
+            <i class="bi bi-lightbulb-fill me-2"></i>
+            <strong>Versión del Sistema:</strong> 1.0 | <strong>Año:</strong> 2025
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button type="button" class="btn btn-sena px-4" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Contacto -->
+  <div class="modal fade" id="modalContacto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-gradient text-white border-0" style="background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);">
+          <h5 class="modal-title"><i class="bi bi-envelope-heart me-2"></i>Contacto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="text-center mb-4">
+            <div class="icon-circle mx-auto mb-3" style="background: linear-gradient(135deg, #2d6a4f, #40916c);">
+              <i class="bi bi-building text-white" style="font-size: 2.5rem;"></i>
+            </div>
+            <h5 class="fw-bold">Centro Minero SENA</h5>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon bg-danger">
+              <i class="bi bi-geo-alt-fill text-white"></i>
+            </div>
+            <div class="contact-info">
+              <strong class="d-block text-sena">Dirección</strong>
+              <span class="text-muted">Centro Minero SENA<br>Sogamoso, Boyacá, Colombia</span>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon bg-success">
+              <i class="bi bi-telephone-fill text-white"></i>
+            </div>
+            <div class="contact-info">
+              <strong class="d-block text-sena">Teléfono</strong>
+              <a href="tel:+5746044440400" class="text-decoration-none text-muted">(604) 444 0400</a>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon bg-primary">
+              <i class="bi bi-envelope-fill text-white"></i>
+            </div>
+            <div class="contact-info">
+              <strong class="d-block text-sena">Correo Electrónico</strong>
+              <a href="mailto:gilcentrominero@gmail.com" class="text-decoration-none text-primary">gilcentrominero@gmail.com</a>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon bg-info">
+              <i class="bi bi-globe text-white"></i>
+            </div>
+            <div class="contact-info">
+              <strong class="d-block text-sena">Sitio Web</strong>
+              <a href="https://www.sena.edu.co" target="_blank" class="text-decoration-none text-info">www.sena.edu.co</a>
+            </div>
+          </div>
+          
+          <hr class="my-4">
+          
+          <div class="support-section">
+            <div class="d-flex align-items-center mb-3">
+              <div class="icon-badge bg-warning me-3">
+                <i class="bi bi-headset text-white"></i>
+              </div>
+              <h6 class="fw-bold text-sena mb-0">Soporte Técnico</h6>
+            </div>
+            <p class="text-muted small ps-5 mb-2">Para reportar problemas técnicos o solicitar soporte:</p>
+            <div class="ps-5">
+              <a href="mailto:gilcentrominero@gmail.com?subject=Soporte Técnico - Sistema de Laboratorios" 
+                 class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-envelope me-2"></i>Enviar Correo
+              </a>
+            </div>
+          </div>
+          
+          <div class="schedule-badge mt-3">
+            <i class="bi bi-clock-fill me-2"></i>
+            <strong>Horario:</strong> Lunes a Viernes, 7:00 AM - 5:00 PM
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-light">
+          <button type="button" class="btn btn-sena px-4" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-2"></i>Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Política de Privacidad -->
+  <div class="modal fade" id="modalPrivacidad" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-sena text-white">
+          <h5 class="modal-title"><i class="bi bi-shield-check me-2"></i>Política de Privacidad</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">Última actualización: Octubre 2025</p>
+          
+          <h6 class="fw-bold text-sena mt-4">1. Información que Recopilamos</h6>
+          <p>El Sistema de Gestión de Laboratorios del Centro Minero SENA recopila la siguiente información:</p>
+          <ul>
+            <li><strong>Datos de identificación:</strong> Nombre, documento de identidad, correo electrónico</li>
+            <li><strong>Datos biométricos:</strong> Imágenes faciales para control de acceso</li>
+            <li><strong>Datos de uso:</strong> Registros de acceso, reservas de equipos, historial de uso</li>
+            <li><strong>Datos técnicos:</strong> Dirección IP, tipo de navegador, sistema operativo</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">2. Uso de la Información</h6>
+          <p>Utilizamos la información recopilada para:</p>
+          <ul>
+            <li>Gestionar el acceso a laboratorios y equipos</li>
+            <li>Verificar la identidad de usuarios mediante reconocimiento facial</li>
+            <li>Generar reportes de uso y estadísticas</li>
+            <li>Mejorar la seguridad y funcionamiento del sistema</li>
+            <li>Cumplir con requisitos legales y normativos</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">3. Protección de Datos</h6>
+          <p>Implementamos medidas de seguridad técnicas y organizativas para proteger sus datos personales:</p>
+          <ul>
+            <li>Cifrado de datos sensibles</li>
+            <li>Control de acceso basado en roles</li>
+            <li>Auditoría de accesos y cambios</li>
+            <li>Respaldos periódicos de información</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">4. Derechos del Usuario</h6>
+          <p>Como usuario del sistema, usted tiene derecho a:</p>
+          <ul>
+            <li>Acceder a sus datos personales</li>
+            <li>Solicitar corrección de datos inexactos</li>
+            <li>Solicitar eliminación de datos (sujeto a requisitos legales)</li>
+            <li>Oponerse al procesamiento de sus datos</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">5. Retención de Datos</h6>
+          <p>Los datos personales se conservan durante el tiempo necesario para cumplir con los fines para los que fueron recopilados y de acuerdo con las obligaciones legales aplicables.</p>
+          
+          <div class="alert alert-info mt-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Para ejercer sus derechos o realizar consultas sobre privacidad, contacte a: 
+            <a href="mailto:gilcentrominero@gmail.com">gilcentrominero@gmail.com</a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Términos de Uso -->
+  <div class="modal fade" id="modalTerminos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-sena text-white">
+          <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Términos de Uso</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">Última actualización: Octubre 2025</p>
+          
+          <h6 class="fw-bold text-sena mt-4">1. Aceptación de Términos</h6>
+          <p>Al acceder y utilizar el Sistema de Gestión de Laboratorios del Centro Minero SENA, usted acepta estar sujeto a estos términos y condiciones de uso.</p>
+          
+          <h6 class="fw-bold text-sena mt-4">2. Uso Autorizado</h6>
+          <p>El sistema está destinado exclusivamente para:</p>
+          <ul>
+            <li>Aprendices matriculados en programas del Centro Minero SENA</li>
+            <li>Instructores y personal autorizado del SENA</li>
+            <li>Administradores del sistema</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">3. Responsabilidades del Usuario</h6>
+          <p>Como usuario del sistema, usted se compromete a:</p>
+          <ul>
+            <li>Mantener la confidencialidad de sus credenciales de acceso</li>
+            <li>No compartir su cuenta con terceros</li>
+            <li>Utilizar el sistema únicamente para fines educativos y administrativos legítimos</li>
+            <li>No intentar acceder a áreas restringidas o datos de otros usuarios</li>
+            <li>Reportar cualquier problema de seguridad o uso indebido</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">4. Uso de Reconocimiento Facial</h6>
+          <p>Al registrar su rostro en el sistema, usted autoriza:</p>
+          <ul>
+            <li>El almacenamiento de sus datos biométricos faciales</li>
+            <li>El uso de reconocimiento facial para control de acceso</li>
+            <li>El procesamiento de imágenes para verificación de identidad</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">5. Reservas y Uso de Equipos</h6>
+          <ul>
+            <li>Las reservas deben realizarse con anticipación según disponibilidad</li>
+            <li>El usuario es responsable del cuidado de los equipos durante su uso</li>
+            <li>Cualquier daño debe reportarse inmediatamente</li>
+            <li>El incumplimiento puede resultar en suspensión de privilegios</li>
+          </ul>
+          
+          <h6 class="fw-bold text-sena mt-4">6. Propiedad Intelectual</h6>
+          <p>Todo el contenido, diseño y funcionalidad del sistema son propiedad del SENA y están protegidos por leyes de propiedad intelectual.</p>
+          
+          <h6 class="fw-bold text-sena mt-4">7. Modificaciones</h6>
+          <p>El SENA se reserva el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación.</p>
+          
+          <h6 class="fw-bold text-sena mt-4">8. Suspensión de Servicio</h6>
+          <p>El SENA se reserva el derecho de suspender o terminar el acceso de cualquier usuario que viole estos términos.</p>
+          
+          <div class="alert alert-warning mt-4">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Importante:</strong> El uso indebido del sistema puede resultar en acciones disciplinarias de acuerdo con el reglamento del SENA.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Accesibilidad -->
+  <div class="modal fade" id="modalAccesibilidad" tabindex="-1" aria-labelledby="modalAccesibilidadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalAccesibilidadLabel">
+            <i class="bi bi-universal-access me-2"></i>Opciones de Accesibilidad
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-4">Personaliza tu experiencia para una mejor navegación</p>
+          
+          <!-- Alto Contraste -->
+          <div class="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-eye me-2"></i>Alto Contraste</h6>
+              <small class="text-muted">Aumenta el contraste entre texto y fondo</small>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="switchAltoContraste" style="width: 3em; height: 1.5em;">
+            </div>
+          </div>
+
+          <!-- Tamaño de Texto -->
+          <div class="mb-3 p-3 border rounded">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0"><i class="bi bi-fonts me-2"></i>Tamaño de Texto</h6>
+              <span class="badge bg-primary" id="badgeTamanoTexto">100%</span>
+            </div>
+            <small class="text-muted d-block mb-3">Ajusta el tamaño del texto a tu preferencia</small>
+            <div class="d-flex align-items-center gap-3">
+              <small>A</small>
+              <input type="range" class="form-range flex-grow-1" id="rangeTamanoTexto" min="80" max="200" step="10" value="100">
+              <small class="fs-4">A</small>
+            </div>
+          </div>
+
+          <!-- Modo Oscuro -->
+          <div class="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-moon-stars me-2"></i>Modo Oscuro</h6>
+              <small class="text-muted">Reduce el brillo con colores oscuros</small>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="switchModoOscuro" style="width: 3em; height: 1.5em;">
+            </div>
+          </div>
+
+          <!-- Reducir Animaciones -->
+          <div class="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-lightning me-2"></i>Reducir Animaciones</h6>
+              <small class="text-muted">Desactiva transiciones y animaciones</small>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="switchAnimaciones" style="width: 3em; height: 1.5em;">
+            </div>
+          </div>
+
+          <!-- Atajos de Teclado -->
+          <div class="mt-4 p-3 bg-light rounded">
+            <h6 class="mb-3"><i class="bi bi-keyboard me-2"></i>Atajos de Teclado</h6>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <small><kbd>Tab</kbd> Navegar elementos</small>
+              </div>
+              <div class="col-md-6">
+                <small><kbd>Enter</kbd> Activar elemento</small>
+              </div>
+              <div class="col-md-6">
+                <small><kbd>Esc</kbd> Cerrar modal</small>
+              </div>
+              <div class="col-md-6">
+                <small><kbd>Alt+L</kbd> Cerrar sesión</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="btnGuardarAccesibilidad">
+            <i class="bi bi-check-circle me-1"></i>Guardar Configuración
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  
+  <script>
+    // Accesibilidad: Aplicar preferencias guardadas
+    function aplicarAccesibilidad() {
+      const body = document.body;
+      const altoContraste = localStorage.getItem('accesibilidad_alto_contraste') === 'true';
+      const tamanoTexto = localStorage.getItem('accesibilidad_tamano_texto') || '100';
+      const modoOscuro = localStorage.getItem('accesibilidad_modo_oscuro') === 'true';
+      const animaciones = localStorage.getItem('accesibilidad_animaciones') === 'true';
+      
+      body.classList.toggle('alto-contraste', altoContraste);
+      body.classList.toggle('modo-oscuro', modoOscuro);
+      body.classList.toggle('animaciones-reducidas', animaciones);
+      
+      // Aplicar tamaño de texto
+      body.style.fontSize = tamanoTexto + '%';
+      
+      const switchAC = document.getElementById('switchAltoContraste');
+      const rangeTT = document.getElementById('rangeTamanoTexto');
+      const badgeTT = document.getElementById('badgeTamanoTexto');
+      const switchMO = document.getElementById('switchModoOscuro');
+      const switchAN = document.getElementById('switchAnimaciones');
+      
+      if (switchAC) switchAC.checked = altoContraste;
+      if (rangeTT) {
+        rangeTT.value = tamanoTexto;
+        if (badgeTT) badgeTT.textContent = tamanoTexto + '%';
+      }
+      if (switchMO) switchMO.checked = modoOscuro;
+      if (switchAN) switchAN.checked = animaciones;
+    }
+    
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      // Aplicar preferencias guardadas
+      aplicarAccesibilidad();
+      
+      // Guardar preferencias
+      const btnGuardar = document.getElementById('btnGuardarAccesibilidad');
+      if (btnGuardar) {
+        btnGuardar.addEventListener('click', function() {
+          const altoContraste = document.getElementById('switchAltoContraste').checked;
+          const tamanoTexto = document.getElementById('rangeTamanoTexto').value;
+          const modoOscuro = document.getElementById('switchModoOscuro').checked;
+          const animaciones = document.getElementById('switchAnimaciones').checked;
+          
+          localStorage.setItem('accesibilidad_alto_contraste', altoContraste);
+          localStorage.setItem('accesibilidad_tamano_texto', tamanoTexto);
+          localStorage.setItem('accesibilidad_modo_oscuro', modoOscuro);
+          localStorage.setItem('accesibilidad_animaciones', animaciones);
+          
+          aplicarAccesibilidad();
+          
+          // Cerrar modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('modalAccesibilidad'));
+          if (modal) modal.hide();
+          
+          // Mostrar notificación
+          const alert = document.createElement('div');
+          alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+          alert.style.zIndex = '9999';
+          alert.innerHTML = '<i class="bi bi-check-circle me-2"></i>Configuración guardada exitosamente<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+          document.body.appendChild(alert);
+          setTimeout(() => alert.remove(), 3000);
+        });
+      }
+      
+      // Aplicar cambios en tiempo real - Switches
+      ['switchAltoContraste', 'switchModoOscuro', 'switchAnimaciones'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.addEventListener('change', function() {
+            const body = document.body;
+            if (id === 'switchAltoContraste') {
+              body.classList.toggle('alto-contraste', this.checked);
+            } else if (id === 'switchModoOscuro') {
+              body.classList.toggle('modo-oscuro', this.checked);
+            } else if (id === 'switchAnimaciones') {
+              body.classList.toggle('animaciones-reducidas', this.checked);
+            }
+          });
+        }
+      });
+      
+      // Aplicar cambios en tiempo real - Tamaño de texto
+      const rangeTamano = document.getElementById('rangeTamanoTexto');
+      const badgeTamano = document.getElementById('badgeTamanoTexto');
+      if (rangeTamano && badgeTamano) {
+        rangeTamano.addEventListener('input', function() {
+          const valor = this.value;
+          badgeTamano.textContent = valor + '%';
+          document.body.style.fontSize = valor + '%';
+        });
+      }
+      
+      // Atajo Alt+L para logout
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key === 'l') {
+          e.preventDefault();
+          window.location.href = '/logout';
+        }
+      });
+    });
+  </script>
+  
+  <style>
+    /* Accesibilidad */
+    body.alto-contraste {
+      filter: contrast(1.5);
+    }
+    body.modo-oscuro {
+      background: #1a1a1a !important;
+      color: #e0e0e0 !important;
+    }
+    body.modo-oscuro .bg-white {
+      background: #2a2a2a !important;
+      color: #e0e0e0 !important;
+    }
+    body.modo-oscuro .card {
+      background: #2a2a2a !important;
+      color: #e0e0e0 !important;
+    }
+    body.animaciones-reducidas * {
+      animation: none !important;
+      transition: none !important;
+    }
+    
+    /* Estilos para Modales Mejorados */
+    .icon-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e5128, #2d6a4f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(30, 81, 40, 0.3);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .icon-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .info-card {
+      padding: 20px;
+      border-radius: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #2d6a4f;
+      transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .feature-list li {
+      padding: 8px 0;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-list li:hover {
+      padding-left: 10px;
+    }
+    
+    .version-badge {
+      background: linear-gradient(135deg, #e7f3ff, #cfe8ff);
+      border-left: 4px solid #2196f3;
+      padding: 15px 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+    
+    .contact-item:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .contact-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-size: 1.3rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    
+    .contact-info {
+      flex: 1;
+    }
+    
+    .support-section {
+      background: #fff9e6;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .schedule-badge {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border-left: 4px solid #4caf50;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .privacy-section {
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background: #f8f9fa;
+      border-left: 4px solid #6c757d;
+      transition: all 0.3s ease;
+    }
+    
+    .privacy-section:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    
+    .privacy-section h6 {
+      color: #1e5128;
+      margin-bottom: 15px;
+    }
+    
+    .privacy-section ul {
+      margin-bottom: 0;
+    }
+    
+    .privacy-section ul li {
+      padding: 5px 0;
+    }
+    
+    .terms-section {
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background: #f8f9fa;
+      border-left: 4px solid #2d6a4f;
+      transition: all 0.3s ease;
+    }
+    
+    .terms-section:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    
+    .terms-section h6 {
+      color: #1e5128;
+      margin-bottom: 15px;
+    }
+    
+    .modal-content {
+      overflow: hidden;
+    }
+    
+    .modal-header.bg-gradient {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .modal-header.bg-gradient::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+</html>
+
+<!-- Modal: Ayuda Micrófono -->
+<div class="modal fade" id="modalAyudaMicrofono" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-sena text-white">
+        <h5 class="modal-title"><i class="bi bi-mic-fill me-2"></i>Ayuda - Comandos de Voz</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Importante:</strong> El navegador necesita tu permiso para acceder al micrófono.
+        </div>
+
+        <h6 class="fw-bold mb-3">🎤 Cómo Usar Comandos de Voz:</h6>
+        
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6 class="text-sena"><i class="bi bi-1-circle me-2"></i>Activar el Micrófono</h6>
+            <ol>
+              <li>Haz clic en el botón <i class="bi bi-mic"></i> en la barra superior</li>
+              <li>El navegador pedirá permiso para usar el micrófono</li>
+              <li>Haz clic en <strong>"Permitir"</strong></li>
+              <li>El botón cambiará a <i class="bi bi-mic-mute"></i> indicando que está escuchando</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6 class="text-sena"><i class="bi bi-2-circle me-2"></i>Comandos Disponibles</h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Di esto:</th>
+                    <th>Acción:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>"ir a equipos"</code></td>
+                    <td>Navega a la página de equipos</td>
+                  </tr>
+                  <tr>
+                    <td><code>"ir a inventario"</code></td>
+                    <td>Navega a la página de inventario</td>
+                  </tr>
+                  <tr>
+                    <td><code>"ir a reservas"</code></td>
+                    <td>Navega a la página de reservas</td>
+                  </tr>
+                  <tr>
+                    <td><code>"ir a dashboard"</code> o <code>"inicio"</code></td>
+                    <td>Vuelve al dashboard</td>
+                  </tr>
+                  <tr>
+                    <td><code>"ayuda"</code></td>
+                    <td>Muestra comandos disponibles</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-warning mt-2">
+              <i class="bi bi-key me-2"></i>
+              <strong>Nota:</strong> Para comandos avanzados (crear, editar, eliminar), necesitas iniciar sesión API con el botón <i class="bi bi-key"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion" id="accordionMicrofono">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#permisos">
+                <i class="bi bi-shield-check me-2"></i>Solución de Problemas - Permisos
+              </button>
+            </h2>
+            <div id="permisos" class="accordion-collapse collapse" data-bs-parent="#accordionMicrofono">
+              <div class="accordion-body">
+                <h6 class="fw-bold">Chrome / Edge:</h6>
+                <ol>
+                  <li>Haz clic en el icono 🔒 en la barra de direcciones</li>
+                  <li>Busca "Micrófono" en permisos</li>
+                  <li>Cambia a <strong>"Permitir"</strong></li>
+                  <li>Recarga la página (F5)</li>
+                </ol>
+
+                <h6 class="fw-bold mt-3">Firefox:</h6>
+                <ol>
+                  <li>Haz clic en el icono junto a la URL</li>
+                  <li>Ve a "Permisos"</li>
+                  <li>Marca "Permitir" en micrófono</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#consejos">
+                <i class="bi bi-lightbulb me-2"></i>Consejos para Mejor Reconocimiento
+              </button>
+            </h2>
+            <div id="consejos" class="accordion-collapse collapse" data-bs-parent="#accordionMicrofono">
+              <div class="accordion-body">
+                <ul>
+                  <li><i class="bi bi-check-circle text-success me-2"></i>Habla claramente y a velocidad normal</li>
+                  <li><i class="bi bi-check-circle text-success me-2"></i>Reduce el ruido de fondo</li>
+                  <li><i class="bi bi-check-circle text-success me-2"></i>Mantén el micrófono cerca</li>
+                  <li><i class="bi bi-check-circle text-success me-2"></i>Usa comandos cortos y directos</li>
+                  <li><i class="bi bi-check-circle text-success me-2"></i>Espera a que el sistema procese antes de dar otro comando</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-success mt-3">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Navegadores Compatibles:</strong> Chrome, Edge, Safari (macOS/iOS). Firefox tiene soporte limitado.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-sena" data-bs-dismiss="modal" onclick="document.getElementById('btnVoice')?.click()">
+          <i class="bi bi-mic me-2"></i>Probar Ahora
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Inicializar tooltips de Bootstrap
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+</body>
+</html>

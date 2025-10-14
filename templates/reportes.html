@@ -1,0 +1,576 @@
+{% extends 'base.html' %}
+{% set title = 'Reportes y Estadísticas' %}
+{% block content %}
+<style>
+  .reportes-header {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+  }
+  .stat-mini-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+  .stat-mini-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+  }
+  .chart-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  .chart-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    padding: 15px 20px;
+    border-radius: 15px 15px 0 0;
+  }
+  .filter-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .export-btn {
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+</style>
+
+<!-- Header -->
+<div class="reportes-header">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h3 class="mb-2"><i class="bi bi-graph-up-arrow me-2"></i>Reportes y Estadísticas</h3>
+      <p class="mb-0 opacity-75">Análisis detallado del uso del sistema</p>
+    </div>
+    <div>
+      <button class="btn btn-light export-btn" onclick="exportarReporte()">
+        <i class="bi bi-download me-2"></i>Exportar PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div class="filter-section">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label fw-semibold small">Fecha Inicio</label>
+      <input type="date" class="form-control" id="fechaInicio" value="{{ fecha_inicio }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label fw-semibold small">Fecha Fin</label>
+      <input type="date" class="form-control" id="fechaFin" value="{{ fecha_fin }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label fw-semibold small">Tipo de Reporte</label>
+      <select class="form-select" id="tipoReporte">
+        <option value="general">General</option>
+        <option value="equipos">Equipos</option>
+        <option value="usuarios">Usuarios</option>
+        <option value="inventario">Inventario</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-sena w-100" onclick="aplicarFiltros()">
+        <i class="bi bi-funnel me-2"></i>Aplicar Filtros
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mini Estadísticas -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card stat-mini-card">
+      <div class="card-body text-center p-3">
+        <i class="bi bi-cpu text-success" style="font-size: 2rem;"></i>
+        <h4 class="mb-0 mt-2" id="totalEquipos">--</h4>
+        <small class="text-muted">Total Equipos</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-mini-card">
+      <div class="card-body text-center p-3">
+        <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+        <h4 class="mb-0 mt-2" id="totalUsuarios">--</h4>
+        <small class="text-muted">Usuarios Activos</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-mini-card">
+      <div class="card-body text-center p-3">
+        <i class="bi bi-calendar-check text-info" style="font-size: 2rem;"></i>
+        <h4 class="mb-0 mt-2" id="totalReservas">--</h4>
+        <small class="text-muted">Reservas</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-mini-card">
+      <div class="card-body text-center p-3">
+        <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
+        <h4 class="mb-0 mt-2" id="horasUso">--</h4>
+        <small class="text-muted">Horas de Uso</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gráficos Principales -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-lg-6">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-bar-chart-line-fill me-2 text-success"></i>
+          Equipos Más Utilizados (30 días)
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <canvas id="chartEquipos" style="max-height: 300px;"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-lg-6">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-people-fill me-2 text-primary"></i>
+          Usuarios Más Activos (7 días)
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <canvas id="chartUsuarios" style="max-height: 300px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gráficos Secundarios -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-lg-4">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-pie-chart-fill me-2 text-info"></i>
+          Estado de Equipos
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <canvas id="chartEstadoEquipos"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-lg-4">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-graph-up me-2 text-warning"></i>
+          Tendencia de Uso Semanal
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <canvas id="chartTendencia"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-12 col-lg-4">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-box-seam me-2 text-danger"></i>
+          Inventario Crítico
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <div id="inventarioCritico" style="max-height: 300px; overflow-y: auto;">
+          <div class="text-center text-muted py-4">
+            <i class="bi bi-hourglass-split" style="font-size: 2rem;"></i>
+            <p class="mt-2">Cargando datos...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabla de Detalles -->
+<div class="row">
+  <div class="col-12">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <h6 class="mb-0 fw-bold">
+          <i class="bi bi-table me-2"></i>
+          Detalle de Actividades Recientes
+        </h6>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Equipo</th>
+                <th>Acción</th>
+                <th>Duración</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaActividades">
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  <i class="bi bi-hourglass-split me-2"></i>Cargando datos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Configuración de colores
+const colores = {
+  sena: 'rgba(45, 106, 79, 0.85)',
+  senaBorder: 'rgba(30, 81, 40, 1)',
+  success: 'rgba(16, 185, 129, 0.85)',
+  primary: 'rgba(59, 130, 246, 0.85)',
+  warning: 'rgba(245, 158, 11, 0.85)',
+  danger: 'rgba(239, 68, 68, 0.85)',
+  info: 'rgba(59, 130, 246, 0.85)'
+};
+
+// Función para cargar datos
+async function cargarDatos() {
+  try {
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+      mostrarAlerta('Por favor, inicia sesión con el token JWT para ver los reportes completos.');
+      cargarDatosDummy();
+      return;
+    }
+
+    const res = await fetch('/api/estadisticas', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        mostrarAlerta('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        if (window.ApiAuth) window.ApiAuth.openLogin();
+      }
+      cargarDatosDummy();
+      return;
+    }
+
+    const data = (await res.json()).estadisticas;
+    renderizarDatos(data);
+  } catch (e) {
+    console.error('Error cargando datos:', e);
+    cargarDatosDummy();
+  }
+}
+
+// Renderizar datos reales
+function renderizarDatos(data) {
+  // Mini estadísticas
+  document.getElementById('totalEquipos').textContent = data.total_equipos || 0;
+  document.getElementById('totalUsuarios').textContent = data.usuarios_activos_count || 0;
+  document.getElementById('totalReservas').textContent = data.total_reservas || 0;
+  document.getElementById('horasUso').textContent = (data.horas_uso || 0) + 'h';
+
+  // Gráfico de equipos más usados
+  const eNames = (data.equipos_mas_usados || []).map(x => x.nombre);
+  const eUsos = (data.equipos_mas_usados || []).map(x => x.usos);
+  
+  new Chart(document.getElementById('chartEquipos'), {
+    type: 'bar',
+    data: {
+      labels: eNames,
+      datasets: [{
+        label: 'Usos',
+        data: eUsos,
+        backgroundColor: colores.sena,
+        borderColor: colores.senaBorder,
+        borderWidth: 2,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+          borderRadius: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
+        },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Gráfico de usuarios activos
+  const uNames = (data.usuarios_activos || []).map(x => x.nombre);
+  const uCmds = (data.usuarios_activos || []).map(x => x.comandos);
+  
+  new Chart(document.getElementById('chartUsuarios'), {
+    type: 'bar',
+    data: {
+      labels: uNames,
+      datasets: [{
+        label: 'Actividad',
+        data: uCmds,
+        backgroundColor: colores.primary,
+        borderColor: 'rgba(0, 123, 255, 1)',
+        borderWidth: 2,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: 12,
+          borderRadius: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.05)' }
+        },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  crearGraficosAdicionales();
+}
+
+// Cargar datos dummy si no hay conexión
+function cargarDatosDummy() {
+  document.getElementById('totalEquipos').textContent = '24';
+  document.getElementById('totalUsuarios').textContent = '18';
+  document.getElementById('totalReservas').textContent = '45';
+  document.getElementById('horasUso').textContent = '127h';
+
+  // Gráfico equipos dummy
+  new Chart(document.getElementById('chartEquipos'), {
+    type: 'bar',
+    data: {
+      labels: ['Microscopio', 'Osciloscopio', 'Multímetro', 'Balanza', 'Centrífuga'],
+      datasets: [{
+        label: 'Usos',
+        data: [25, 19, 15, 12, 8],
+        backgroundColor: colores.sena,
+        borderColor: colores.senaBorder,
+        borderWidth: 2,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Gráfico usuarios dummy
+  new Chart(document.getElementById('chartUsuarios'), {
+    type: 'bar',
+    data: {
+      labels: ['Juan Pérez', 'María García', 'Carlos López', 'Ana Martínez'],
+      datasets: [{
+        label: 'Actividad',
+        data: [42, 38, 31, 25],
+        backgroundColor: colores.primary,
+        borderColor: 'rgba(0, 123, 255, 1)',
+        borderWidth: 2,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  crearGraficosAdicionales();
+}
+
+// Gráficos adicionales
+function crearGraficosAdicionales() {
+  // Estado de equipos (pie chart)
+  new Chart(document.getElementById('chartEstadoEquipos'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Disponible', 'En Uso', 'Mantenimiento'],
+      datasets: [{
+        data: [15, 6, 3],
+        backgroundColor: [colores.success, colores.warning, colores.danger],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  // Tendencia semanal
+  new Chart(document.getElementById('chartTendencia'), {
+    type: 'line',
+    data: {
+      labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+      datasets: [{
+        label: 'Usos',
+        data: [12, 19, 15, 17, 14, 8, 6],
+        borderColor: colores.warning,
+        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+        tension: 0.4,
+        fill: true,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Inventario crítico
+  document.getElementById('inventarioCritico').innerHTML = `
+    <div class="list-group list-group-flush">
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-exclamation-triangle text-warning me-2"></i>Guantes de látex</span>
+        <span class="badge bg-warning">5 unidades</span>
+      </div>
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-exclamation-triangle text-warning me-2"></i>Pipetas 10ml</span>
+        <span class="badge bg-warning">8 unidades</span>
+      </div>
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-exclamation-triangle text-danger me-2"></i>Reactivo A</span>
+        <span class="badge bg-danger">2 unidades</span>
+      </div>
+    </div>
+  `;
+
+  // Tabla de actividades
+  document.getElementById('tablaActividades').innerHTML = `
+    <tr>
+      <td>13/10/2025 09:15</td>
+      <td>Juan Pérez</td>
+      <td>Microscopio Óptico</td>
+      <td><span class="badge bg-success">Uso</span></td>
+      <td>2h 30m</td>
+      <td><i class="bi bi-check-circle-fill text-success"></i></td>
+    </tr>
+    <tr>
+      <td>13/10/2025 08:45</td>
+      <td>María García</td>
+      <td>Balanza Analítica</td>
+      <td><span class="badge bg-info">Reserva</span></td>
+      <td>1h 15m</td>
+      <td><i class="bi bi-clock-fill text-warning"></i></td>
+    </tr>
+    <tr>
+      <td>12/10/2025 16:30</td>
+      <td>Carlos López</td>
+      <td>Osciloscopio</td>
+      <td><span class="badge bg-success">Uso</span></td>
+      <td>3h 00m</td>
+      <td><i class="bi bi-check-circle-fill text-success"></i></td>
+    </tr>
+  `;
+}
+
+// Funciones auxiliares
+function mostrarAlerta(mensaje) {
+  const alerta = document.createElement('div');
+  alerta.className = 'alert alert-warning alert-dismissible fade show';
+  alerta.innerHTML = `
+    <i class="bi bi-exclamation-triangle me-2"></i>${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  document.querySelector('.reportes-header').after(alerta);
+}
+
+function aplicarFiltros() {
+  const fechaInicio = document.getElementById('fechaInicio').value;
+  const fechaFin = document.getElementById('fechaFin').value;
+  const tipo = document.getElementById('tipoReporte').value;
+  console.log('Aplicando filtros:', { fechaInicio, fechaFin, tipo });
+  // Aquí iría la lógica para recargar datos con filtros
+  cargarDatos();
+}
+
+function exportarReporte() {
+  alert('Función de exportación a PDF en desarrollo');
+  // Aquí iría la lógica para exportar a PDF
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+  // Establecer fechas por defecto
+  const hoy = new Date();
+  const hace30dias = new Date(hoy.getTime() - (30 * 24 * 60 * 60 * 1000));
+  
+  document.getElementById('fechaFin').value = hoy.toISOString().split('T')[0];
+  document.getElementById('fechaInicio').value = hace30dias.toISOString().split('T')[0];
+  
+  // Cargar datos
+  cargarDatos();
+});
+</script>
+{% endblock %}

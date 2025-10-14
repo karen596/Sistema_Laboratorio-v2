@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% set title = 'Usuarios' %}
+{% block content %}
+<div class="table-responsive shadow-sm bg-white rounded">
+  <table class="table table-hover align-middle mb-0" id="tablaUsuarios">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Programa</th>
+        <th>Nivel</th>
+        <th>Activo</th>
+        <th>Email</th>
+        <th>Registro</th>
+        <th>Rostro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td class="text-muted">{{ u.id }}</td>
+        <td class="fw-semibold">{{ u.nombre }}</td>
+        <td>{{ u.tipo }}</td>
+        <td>{{ u.programa }}</td>
+        <td>{{ u.nivel_acceso }}</td>
+        <td>{% if u.activo %}<span class="badge bg-success">Sí</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
+        <td>{{ u.email or '-' }}</td>
+        <td>{{ u.registro }}</td>
+        <td>{{ u.tiene_rostro }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

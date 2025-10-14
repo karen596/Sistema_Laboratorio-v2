@@ -1,0 +1,51 @@
+# =============================
+# DEPENDENCIAS ESENCIALES
+# Centro Minero SENA - Sistema de Laboratorios
+# =============================
+
+# Framework Web
+Flask==3.0.3
+flask-restful==0.3.10
+flask-jwt-extended==4.6.0
+flask-cors==4.0.0
+
+# Base de Datos
+mysql-connector-python==8.1.0
+
+# Configuración
+python-dotenv==1.0.1
+
+# Procesamiento básico
+numpy==1.24.3
+opencv-python==4.8.1.78
+Pillow==10.0.1
+
+# Utilidades
+python-dateutil==2.8.2
+psutil==5.9.8
+
+# =============================
+# RECONOCIMIENTO FACIAL (Opcional)
+# Descomenta si quieres usar reconocimiento facial
+# =============================
+# face-recognition==1.3.0
+# dlib==19.24.2
+
+# =============================
+# RECONOCIMIENTO DE VOZ (Opcional)
+# Descomenta si quieres usar comandos de voz
+# =============================
+# SpeechRecognition==3.10.0
+# pyttsx3==2.90
+
+# =============================
+# IA AVANZADA (Opcional - Solo si necesitas)
+# Descomenta solo si planeas usar IA avanzada
+# =============================
+# tensorflow==2.13.0
+# scikit-image==0.21.0
+# librosa==0.10.1
+# matplotlib==3.7.2
+# seaborn==0.12.2
+# deepspeech==0.9.3
+# webrtcvad==2.0.10

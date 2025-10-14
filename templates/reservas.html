@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% set title = 'Reservas' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <div class="input-group" style="max-width:320px;">
+    <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input id="filtroRes" type="text" class="form-control" placeholder="Buscar por usuario o equipo...">
+  </div>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
+    <i class="bi bi-plus-circle me-1"></i>Nueva Reserva
+  </button>
+</div>
+
+<div class="table-responsive shadow-sm bg-white rounded">
+  <table class="table table-hover align-middle mb-0" id="tablaRes">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Equipo</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reservas %}
+      <tr data-id="{{ r.id }}" data-usuario="{{ r.usuario_nombre|lower }}" data-equipo="{{ r.equipo_nombre|lower }}">
+        <td class="text-muted">{{ r.id }}</td>
+        <td class="fw-semibold">{{ r.usuario_nombre }}</td>
+        <td>{{ r.equipo_nombre }}</td>
+        <td>{{ r.fecha_inicio }}</td>
+        <td>{{ r.fecha_fin }}</td>
+        <td>
+          {% set badge = 'info' if r.estado=='activa' else ('warning' if r.estado=='programada' else ('success' if r.estado=='completada' else 'secondary')) %}
+          <span class="badge bg-{{ badge }} text-uppercase">{{ r.estado }}</span>
+        </td>
+        <td class="text-end">
+          {% if r.estado in ['programada','activa'] %}
+          <button class="btn btn-sm btn-outline-danger btnCancelarRes">Cancelar</button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal: Nueva Reserva -->
+<div class="modal fade" id="modalNuevaReserva" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-calendar-plus me-2"></i>Nueva Reserva</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Equipo *</label>
+          <input type="text" id="equipoId" class="form-control" placeholder="ID del equipo (Ej: EQ-001)">
+          <small class="text-muted">Consulta los equipos disponibles en la sección Equipos</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Fecha y Hora de Inicio *</label>
+          <input type="datetime-local" id="fechaInicio" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Fecha y Hora de Fin *</label>
+          <input type="datetime-local" id="fechaFin" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Propósito *</label>
+          <textarea id="proposito" class="form-control" rows="3" placeholder="Describe el propósito de la reserva..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnCrearReserva">Crear Reserva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const resFilter = document.getElementById('filtroRes');
+  const resBody = document.querySelector('#tablaRes tbody');
+  resFilter.addEventListener('input', ()=>{
+    const t=(resFilter.value||'').toLowerCase();
+    [...resBody.rows].forEach(r=>{
+      const ok = r.dataset.usuario.includes(t)||r.dataset.equipo.includes(t);
+      r.classList.toggle('d-none', !ok);
+    });
+  });
+
+  // Cancelar reserva vía API
+  resBody.addEventListener('click', async (ev)=>{
+    const btn = ev.target.closest('.btnCancelarRes');
+    if(!btn) return;
+    const tr = btn.closest('tr');
+    const id = tr?.dataset?.id;
+    if(!id) return;
+    if(!confirm('¿Cancelar la reserva '+id+'?')) return;
+    const token = localStorage.getItem('jwt');
+    if(!token){ alert('Inicie sesión API (icono llave en la barra superior)'); return; }
+    try{
+      const res = await fetch('/api/reservas/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+      const data = await res.json();
+      if(res.ok){ tr.remove(); }
+      else{ alert(data?.message || 'No fue posible cancelar la reserva'); }
+    }catch(e){ alert('Error cancelando: '+e.message); }
+  });
+
+  // Crear nueva reserva
+  document.getElementById('btnCrearReserva').addEventListener('click', async ()=>{
+    const equipoId = document.getElementById('equipoId').value.trim();
+    const fechaInicio = document.getElementById('fechaInicio').value;
+    const fechaFin = document.getElementById('fechaFin').value;
+    const proposito = document.getElementById('proposito').value.trim();
+
+    if(!equipoId || !fechaInicio || !fechaFin || !proposito){
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+
+    // Convertir formato datetime-local a MySQL datetime
+    const inicio = fechaInicio.replace('T', ' ') + ':00';
+    const fin = fechaFin.replace('T', ' ') + ':00';
+
+    try{
+      const res = await fetch('/reservas/crear', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          equipo_id: equipoId,
+          fecha_inicio: inicio,
+          fecha_fin: fin,
+          proposito: proposito
+        })
+      });
+
+      const data = await res.json();
+      if(data.success){
+        alert('Reserva creada exitosamente');
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    }catch(e){
+      alert('Error creando reserva: ' + e.message);
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{
+  "id": 6,
+  "nombre": "Celular Poco x3",
+  "tipo": "equipo",
+  "categoria": "Guantes",
+  "descripcion": "nnn",
+  "ubicacion": "Estante 3",
+  "laboratorio_id": 1,
+  "laboratorio_nombre": "Mantenimiento General",
+  "laboratorio_ubicacion": "Edificio Principal - Piso 1",
+  "cantidad": null,
+  "estado": "disponible",
+  "equipo_id": "EQ_7A8A86FD",
+  "fotos_capturadas": [
+    "frontal",
+    "posterior",
+    "superior",
+    "inferior",
+    "lateral_derecha",
+    "lateral_izquierda"
+  ],
+  "total_fotos": 6,
+  "entrenado_ia": true,
+  "ruta_imagenes": "imagenes\\equipo\\celular_poco_x3"
+}

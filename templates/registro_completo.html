@@ -1,0 +1,555 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Equipo/Item - Centro Minero SENA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Registrar Nuevo Equipo/Item</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form id="formRegistroCompleto">
+                        
+                        <!-- Tipo de Registro -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Tipo de Registro <span class="text-danger">*</span></label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="tipo_registro" id="tipoEquipo" value="equipo" checked>
+                                    <label class="btn btn-outline-primary" for="tipoEquipo">
+                                        <i class="bi bi-cpu me-2"></i>Equipo (no consumible)
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="tipo_registro" id="tipoItem" value="item">
+                                    <label class="btn btn-outline-primary" for="tipoItem">
+                                        <i class="bi bi-box-seam me-2"></i>Item de Inventario (consumible)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Información Básica -->
+                        <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Información Básica</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required 
+                                       placeholder="Ej: Microscopio Olympus CX23">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tipo_categoria" class="form-label">Tipo/Categoría <span class="text-danger">*</span></label>
+                                <select class="form-select" id="tipo_categoria" name="tipo_categoria" required>
+                                    <option value="">Seleccione una categoría...</option>
+                                    <optgroup label="Equipos de Protección Personal (EPP)">
+                                        <option value="Casco">Casco</option>
+                                        <option value="Guantes">Guantes</option>
+                                        <option value="Gafas de seguridad">Gafas de seguridad</option>
+                                        <option value="Botas de seguridad">Botas de seguridad</option>
+                                        <option value="Protección auditiva">Protección auditiva</option>
+                                        <option value="Mascarilla">Mascarilla</option>
+                                        <option value="Arnés">Arnés</option>
+                                    </optgroup>
+                                    <optgroup label="Instrumentos de Medición">
+                                        <option value="Microscopio">Microscopio</option>
+                                        <option value="Balanza">Balanza</option>
+                                        <option value="Multímetro">Multímetro</option>
+                                        <option value="Calibrador">Calibrador</option>
+                                        <option value="Termómetro">Termómetro</option>
+                                        <option value="pH-metro">pH-metro</option>
+                                        <option value="Manómetro">Manómetro</option>
+                                    </optgroup>
+                                    <optgroup label="Herramientas">
+                                        <option value="Taladro">Taladro</option>
+                                        <option value="Soldadora">Soldadora</option>
+                                        <option value="Esmeril">Esmeril</option>
+                                        <option value="Sierra">Sierra</option>
+                                        <option value="Compresor">Compresor</option>
+                                        <option value="Destornillador">Destornillador</option>
+                                        <option value="Llave">Llave</option>
+                                    </optgroup>
+                                    <optgroup label="Equipos de Laboratorio">
+                                        <option value="Mechero Bunsen">Mechero Bunsen</option>
+                                        <option value="Agitador magnético">Agitador magnético</option>
+                                        <option value="Centrífuga">Centrífuga</option>
+                                        <option value="Autoclave">Autoclave</option>
+                                        <option value="Incubadora">Incubadora</option>
+                                        <option value="Espectrofotómetro">Espectrofotómetro</option>
+                                    </optgroup>
+                                    <optgroup label="Material de Vidrio">
+                                        <option value="Vaso de precipitado">Vaso de precipitado</option>
+                                        <option value="Matraz">Matraz</option>
+                                        <option value="Probeta">Probeta</option>
+                                        <option value="Pipeta">Pipeta</option>
+                                        <option value="Bureta">Bureta</option>
+                                        <option value="Tubo de ensayo">Tubo de ensayo</option>
+                                    </optgroup>
+                                    <optgroup label="Reactivos y Químicos">
+                                        <option value="Ácido">Ácido</option>
+                                        <option value="Base">Base</option>
+                                        <option value="Solvente">Solvente</option>
+                                        <option value="Indicador">Indicador</option>
+                                        <option value="Reactivo">Reactivo</option>
+                                    </optgroup>
+                                    <optgroup label="Material de Consumo">
+                                        <option value="Papel filtro">Papel filtro</option>
+                                        <option value="Cinta adhesiva">Cinta adhesiva</option>
+                                        <option value="Marcador">Marcador</option>
+                                        <option value="Etiquetas">Etiquetas</option>
+                                        <option value="Guantes desechables">Guantes desechables</option>
+                                    </optgroup>
+                                    <optgroup label="Otros">
+                                        <option value="Otro">Otro (especificar en descripción)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                                          placeholder="Características, especificaciones técnicas, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Asignación -->
+                        <h5 class="mb-3"><i class="bi bi-building me-2"></i>Asignación a Laboratorio</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="laboratorio_id" class="form-label">Laboratorio/Taller <span class="text-danger">*</span></label>
+                                <select class="form-select" id="laboratorio_id" name="laboratorio_id" required>
+                                    <option value="">Seleccione un laboratorio...</option>
+                                    {% for lab in laboratorios %}
+                                    <option value="{{ lab.id }}">{{ lab.nombre }} ({{ lab.codigo }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ubicacion" class="form-label">Ubicación Específica</label>
+                                <input type="text" class="form-control" id="ubicacion" name="ubicacion"
+                                       placeholder="Ej: Estante 3, Nivel 2, Gaveta A">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6" id="cantidadGroup" style="display: none;">
+                                <label for="cantidad" class="form-label">Cantidad Inicial <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" value="1" placeholder="Ingrese la cantidad">
+                            </div>
+                            <div class="col-md-6" id="estadoGroup">
+                                <label for="estado" class="form-label">Estado del Equipo</label>
+                                <select class="form-select" id="estado" name="estado">
+                                    <option value="disponible">✅ Disponible</option>
+                                    <option value="en_uso">🔵 En Uso</option>
+                                    <option value="mantenimiento">🟡 Mantenimiento</option>
+                                    <option value="fuera_servicio">🔴 Fuera de Servicio</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Captura Visual -->
+                        <h5 class="mb-3"><i class="bi bi-camera me-2"></i>Captura Visual (Opcional)</h5>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Instrucciones:</strong> Activa la cámara y captura las fotos del objeto. Mínimo 1 foto frontal obligatoria.
+                        </div>
+
+                        <!-- Video Principal -->
+                        <div class="text-center mb-4">
+                            <div id="cameraContainer" style="position: relative; display: inline-block;">
+                                <button type="button" id="btnActivarCamara" class="btn btn-lg btn-primary">
+                                    <i class="bi bi-camera-video me-2"></i>Activar Cámara
+                                </button>
+                                <video id="video" autoplay style="display: none; width: 100%; max-width: 640px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"></video>
+                                <canvas id="canvas" style="display: none;"></canvas>
+                                
+                                <!-- Indicador de vista actual -->
+                                <div id="vistaActual" style="display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 15px 30px; border-radius: 10px; font-size: 1.2rem; font-weight: bold;">
+                                    📸 Vista Frontal
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Captura Grande -->
+                        <div class="text-center mb-4" id="captureButtonContainer" style="display: none;">
+                            <button type="button" id="btnCapturar" class="btn btn-success btn-lg px-5 py-3 me-3" style="font-size: 1.3rem;">
+                                <i class="bi bi-camera-fill me-2"></i>CAPTURAR FOTO
+                            </button>
+                            <button type="button" id="btnSaltarVista" class="btn btn-outline-secondary btn-lg px-4 py-3" style="font-size: 1.1rem; display: none;">
+                                <i class="bi bi-skip-forward me-2"></i>Saltar Vista (Opcional)
+                            </button>
+                        </div>
+
+                        <!-- Previsualización y Confirmación -->
+                        <div id="previewContainer" class="text-center mb-4" style="display: none;">
+                            <div class="card" style="max-width: 640px; margin: 0 auto;">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Vista Previa</h5>
+                                    <img id="previewImage" style="max-width: 100%; border-radius: 8px; margin-bottom: 20px;">
+                                    <div class="d-flex gap-3 justify-content-center">
+                                        <button type="button" id="btnGuardarFoto" class="btn btn-success btn-lg px-4">
+                                            <i class="bi bi-check-circle me-2"></i>Guardar Vista
+                                        </button>
+                                        <button type="button" id="btnRepetirFoto" class="btn btn-warning btn-lg px-4">
+                                            <i class="bi bi-arrow-repeat me-2"></i>Repetir Captura
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Miniaturas de Fotos Capturadas -->
+                        <div id="thumbnailsContainer" style="display: none;">
+                            <h6 class="mb-3"><i class="bi bi-images me-2"></i>Fotos Capturadas (<span id="photoCount">0</span>/6)</h6>
+                            <div class="row g-2" id="thumbnails"></div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Registro
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variables globales
+const capturedPhotos = {};
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const btnActivarCamara = document.getElementById('btnActivarCamara');
+const btnCapturar = document.getElementById('btnCapturar');
+const btnGuardarFoto = document.getElementById('btnGuardarFoto');
+const btnRepetirFoto = document.getElementById('btnRepetirFoto');
+const btnSaltarVista = document.getElementById('btnSaltarVista');
+const vistaActualDiv = document.getElementById('vistaActual');
+const captureButtonContainer = document.getElementById('captureButtonContainer');
+const previewContainer = document.getElementById('previewContainer');
+const previewImage = document.getElementById('previewImage');
+const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+const thumbnails = document.getElementById('thumbnails');
+const photoCount = document.getElementById('photoCount');
+
+const vistasOrden = ['frontal', 'posterior', 'superior', 'inferior', 'lateral_derecha', 'lateral_izquierda'];
+const vistasNombres = {
+    'frontal': '📸 Vista Frontal',
+    'posterior': '🔄 Vista Posterior',
+    'superior': '⬆️ Vista Superior',
+    'inferior': '⬇️ Vista Inferior',
+    'lateral_derecha': '➡️ Lateral Derecha',
+    'lateral_izquierda': '⬅️ Lateral Izquierda'
+};
+let vistaActualIndex = 0;
+let tempImageData = null;
+
+// Mostrar/ocultar campo cantidad según tipo
+document.querySelectorAll('input[name="tipo_registro"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const cantidadGroup = document.getElementById('cantidadGroup');
+        const estadoGroup = document.getElementById('estadoGroup');
+        
+        if (e.target.value === 'item') {
+            cantidadGroup.style.display = 'block';
+            estadoGroup.style.display = 'none';
+        } else {
+            cantidadGroup.style.display = 'none';
+            estadoGroup.style.display = 'block';
+        }
+    });
+});
+
+// Activar cámara
+btnActivarCamara.addEventListener('click', async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        video.srcObject = stream;
+        video.style.display = 'block';
+        btnActivarCamara.style.display = 'none';
+        vistaActualDiv.style.display = 'block';
+        captureButtonContainer.style.display = 'block';
+        
+        // Mostrar vista actual
+        actualizarVistaActual();
+    } catch (error) {
+        alert('Error al acceder a la cámara: ' + error.message);
+    }
+});
+
+// Actualizar indicador de vista actual
+function actualizarVistaActual() {
+    const vistaActual = vistasOrden[vistaActualIndex];
+    vistaActualDiv.textContent = vistasNombres[vistaActual];
+    
+    // Mostrar botón "Saltar" solo después de la vista frontal
+    if (vistaActualIndex > 0) {
+        btnSaltarVista.style.display = 'inline-block';
+    } else {
+        btnSaltarVista.style.display = 'none';
+    }
+}
+
+// Capturar foto
+btnCapturar.addEventListener('click', () => {
+    // Capturar imagen
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    
+    tempImageData = canvas.toDataURL('image/jpeg', 0.8);
+    
+    // Mostrar previsualización
+    previewImage.src = tempImageData;
+    captureButtonContainer.style.display = 'none';
+    previewContainer.style.display = 'block';
+});
+
+// Guardar foto
+btnGuardarFoto.addEventListener('click', () => {
+    const vistaActual = vistasOrden[vistaActualIndex];
+    
+    // Guardar la foto
+    capturedPhotos[vistaActual] = tempImageData;
+    tempImageData = null;
+    
+    // Agregar miniatura
+    agregarMiniatura(vistaActual);
+    
+    // Ocultar previsualización
+    previewContainer.style.display = 'none';
+    
+    // Avanzar a la siguiente vista
+    vistaActualIndex++;
+    
+    if (vistaActualIndex < vistasOrden.length) {
+        // Hay más vistas
+        actualizarVistaActual();
+        captureButtonContainer.style.display = 'block';
+    } else {
+        // Todas las vistas capturadas - DETENER CÁMARA
+        const stream = video.srcObject;
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        video.style.display = 'none';
+        captureButtonContainer.style.display = 'none';
+        vistaActualDiv.style.display = 'none';
+        
+        alert('✅ Todas las fotos han sido capturadas. La cámara se ha detenido. Puede proceder a guardar el registro.');
+    }
+});
+
+// Repetir captura
+btnRepetirFoto.addEventListener('click', () => {
+    tempImageData = null;
+    previewContainer.style.display = 'none';
+    captureButtonContainer.style.display = 'block';
+});
+
+// Saltar vista (solo para vistas opcionales)
+btnSaltarVista.addEventListener('click', () => {
+    if (vistaActualIndex === 0) {
+        alert('❌ La vista frontal es obligatoria, no se puede saltar');
+        return;
+    }
+    
+    if (confirm('¿Desea saltar esta vista? No se capturará ninguna foto de esta perspectiva.')) {
+        // Avanzar sin guardar foto
+        vistaActualIndex++;
+        
+        if (vistaActualIndex < vistasOrden.length) {
+            actualizarVistaActual();
+        } else {
+            // Terminó todas las vistas
+            const stream = video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            video.style.display = 'none';
+            captureButtonContainer.style.display = 'none';
+            vistaActualDiv.style.display = 'none';
+            
+            alert('✅ Proceso de captura finalizado. La cámara se ha detenido.');
+        }
+    }
+});
+
+// Agregar miniatura
+function agregarMiniatura(vista) {
+    const col = document.createElement('div');
+    col.className = 'col-4 col-md-2';
+    col.innerHTML = `
+        <div class="card">
+            <img src="${capturedPhotos[vista]}" class="card-img-top" style="height: 100px; object-fit: cover;">
+            <div class="card-body p-2 text-center">
+                <small class="d-block mb-1">${vistasNombres[vista]}</small>
+                <button type="button" class="btn btn-sm btn-danger w-100" onclick="deletePhoto('${vista}')">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    thumbnails.appendChild(col);
+    thumbnailsContainer.style.display = 'block';
+    photoCount.textContent = Object.keys(capturedPhotos).length;
+}
+
+// Eliminar foto
+function deletePhoto(vista) {
+    if (!confirm('¿Está seguro de eliminar esta foto?')) {
+        return;
+    }
+    
+    delete capturedPhotos[vista];
+    
+    // Recargar miniaturas
+    thumbnails.innerHTML = '';
+    Object.keys(capturedPhotos).forEach(v => {
+        agregarMiniatura(v);
+    });
+    
+    // Si no hay fotos, ocultar contenedor
+    if (Object.keys(capturedPhotos).length === 0) {
+        thumbnailsContainer.style.display = 'none';
+    }
+    
+    photoCount.textContent = Object.keys(capturedPhotos).length;
+}
+
+// Enviar formulario
+document.getElementById('formRegistroCompleto').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    console.log('=== VALIDACIÓN DE FORMULARIO ===');
+    
+    // Validar foto frontal
+    if (!capturedPhotos['frontal']) {
+        alert('❌ Debe capturar al menos la foto frontal');
+        return;
+    }
+    console.log('✓ Foto frontal OK');
+    
+    const tipoRegistro = document.querySelector('input[name="tipo_registro"]:checked').value;
+    console.log('Tipo registro:', tipoRegistro);
+    
+    const nombre = document.getElementById('nombre').value.trim();
+    console.log('Nombre:', nombre);
+    
+    const tipo_categoria = document.getElementById('tipo_categoria').value;
+    console.log('Categoría:', tipo_categoria);
+    
+    const laboratorio_id = document.getElementById('laboratorio_id').value;
+    console.log('Laboratorio ID:', laboratorio_id);
+    
+    // Validar campos obligatorios
+    if (!nombre) {
+        alert('❌ El campo Nombre es obligatorio');
+        document.getElementById('nombre').focus();
+        return;
+    }
+    
+    if (!tipo_categoria) {
+        alert('❌ Debe seleccionar una Categoría');
+        document.getElementById('tipo_categoria').focus();
+        return;
+    }
+    
+    if (!laboratorio_id) {
+        alert('❌ Debe seleccionar un Laboratorio');
+        document.getElementById('laboratorio_id').focus();
+        return;
+    }
+    
+    console.log('✓ Todos los campos obligatorios OK');
+    console.log('Total de fotos:', Object.keys(capturedPhotos).length);
+    
+    const formData = {
+        tipo_registro: tipoRegistro,
+        nombre: nombre,
+        tipo_categoria: tipo_categoria,
+        descripcion: document.getElementById('descripcion').value,
+        laboratorio_id: parseInt(laboratorio_id),
+        ubicacion: document.getElementById('ubicacion').value,
+        cantidad: tipoRegistro === 'item' ? parseInt(document.getElementById('cantidad').value) : null,
+        estado: tipoRegistro === 'equipo' ? document.getElementById('estado').value : null,
+        fotos: capturedPhotos
+    };
+    
+    console.log('FormData a enviar:', formData);
+    
+    try {
+        console.log('Enviando datos al servidor...');
+        
+        const response = await fetch('/api/registro-completo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        console.log('Respuesta del servidor:', response.status);
+        
+        const result = await response.json();
+        console.log('Resultado:', result);
+        
+        if (result.success) {
+            alert('✅ Registro creado exitosamente');
+            window.location.href = '/laboratorios';
+        } else {
+            console.error('Error del servidor:', result);
+            alert('❌ Error del servidor: ' + (result.message || 'Error desconocido'));
+        }
+    } catch (error) {
+        console.error('Error al enviar:', error);
+        alert('❌ Error al guardar: ' + error.message);
+    }
+});
+</script>
+
+<style>
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+#photoGrid .card {
+    min-height: 200px;
+}
+#photoGrid .col-md-4 {
+    transition: all 0.3s ease;
+}
+#photoGrid .col-md-4.border {
+    animation: pulse 0.5s ease-in-out;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+</style>
+
+{% endblock %}

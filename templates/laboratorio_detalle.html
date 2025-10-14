@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+{% set title = laboratorio.nombre %}
+
+{% block content %}
+<!-- Encabezado del laboratorio -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('laboratorios') }}">Laboratorios</a></li>
+                <li class="breadcrumb-item active">{{ laboratorio.codigo }}</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0">
+            {% if laboratorio.tipo == 'laboratorio' %}🧪
+            {% elif laboratorio.tipo == 'aula' %}📚
+            {% elif laboratorio.tipo == 'taller' %}🔧
+            {% else %}📦{% endif %}
+            {{ laboratorio.nombre }}
+        </h1>
+        <p class="text-muted mb-0">{{ laboratorio.codigo }} - {{ laboratorio.tipo.title() }}</p>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-{{ 'success' if laboratorio.estado == 'activo' else 'warning' if laboratorio.estado == 'mantenimiento' else 'secondary' }} fs-6">
+            {{ laboratorio.estado.title() }}
+        </span>
+        {% if user.user_level >= 3 %}
+        <div class="mt-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="editarLaboratorio()">
+                <i class="bi bi-pencil"></i> Editar
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Información del laboratorio -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información General</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Ubicación:</strong><br>{{ laboratorio.ubicacion or 'No especificada' }}</p>
+                        <p><strong>Responsable:</strong><br>{{ laboratorio.responsable or 'Sin asignar' }}</p>
+                        {% if laboratorio.capacidad_estudiantes > 0 %}
+                        <p><strong>Capacidad:</strong><br>{{ laboratorio.capacidad_estudiantes }} estudiantes</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if laboratorio.area_m2 %}
+                        <p><strong>Área:</strong><br>{{ "%.1f"|format(laboratorio.area_m2) }} m²</p>
+                        {% endif %}
+                        {% if laboratorio.telefono_contacto %}
+                        <p><strong>Teléfono:</strong><br>{{ laboratorio.telefono_contacto }}</p>
+                        {% endif %}
+                        {% if laboratorio.email_contacto %}
+                        <p><strong>Email:</strong><br>{{ laboratorio.email_contacto }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if laboratorio.equipamiento_especializado %}
+                <div class="mt-3">
+                    <strong>Equipamiento Especializado:</strong>
+                    <p class="mt-1">{{ laboratorio.equipamiento_especializado }}</p>
+                </div>
+                {% endif %}
+                
+                {% if laboratorio.normas_seguridad %}
+                <div class="mt-3">
+                    <strong>Normas de Seguridad:</strong>
+                    <p class="mt-1">{{ laboratorio.normas_seguridad }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="col-lg-4">
+        <div class="row">
+            <div class="col-12 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0">{{ laboratorio.total_equipos }}</h3>
+                        <small>Equipos Totales</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0">{{ laboratorio.total_items }}</h3>
+                        <small>Items de Inventario</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0">${{ "%.2f"|format(laboratorio.valor_inventario or 0) }}</h3>
+                        <small>Valor Total Inventario</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs de contenido -->
+<ul class="nav nav-tabs" id="labTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="equipos-tab" data-bs-toggle="tab" data-bs-target="#equipos" type="button">
+            <i class="bi bi-cpu"></i> Equipos ({{ equipos|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="inventario-tab" data-bs-toggle="tab" data-bs-target="#inventario" type="button">
+            <i class="bi bi-box"></i> Inventario ({{ inventario|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="reservas-tab" data-bs-toggle="tab" data-bs-target="#reservas" type="button">
+            <i class="bi bi-calendar"></i> Reservas
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content mt-3" id="labTabsContent">
+    <!-- Tab Equipos -->
+    <div class="tab-pane fade show active" id="equipos" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Equipos del Laboratorio</h5>
+            {% if user.user_level >= 3 %}
+            <button class="btn btn-primary btn-sm" onclick="agregarEquipo()">
+                <i class="bi bi-plus"></i> Agregar Equipo
+            </button>
+            {% endif %}
+        </div>
+        
+        {% if equipos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Ubicación</th>
+                        <th>Última Calibración</th>
+                        <th>Próximo Mantenimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipo in equipos %}
+                    <tr>
+                        <td>
+                            <strong>{{ equipo.nombre }}</strong><br>
+                            <small class="text-muted">{{ equipo.id }}</small>
+                        </td>
+                        <td>{{ equipo.tipo }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if equipo.estado == 'disponible' else 'warning' if equipo.estado == 'en_uso' else 'danger' }}">
+                                {{ equipo.estado.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td>{{ equipo.ubicacion or '-' }}</td>
+                        <td>{{ equipo.calibracion or '-' }}</td>
+                        <td>{{ equipo.mantenimiento or '-' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="verEquipo('{{ equipo.id }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                {% if user.user_level >= 3 %}
+                                <button class="btn btn-outline-secondary" onclick="editarEquipo('{{ equipo.id }}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-cpu fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No hay equipos registrados en este laboratorio</p>
+            {% if user.user_level >= 3 %}
+            <button class="btn btn-primary" onclick="agregarEquipo()">
+                <i class="bi bi-plus"></i> Agregar Primer Equipo
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Tab Inventario -->
+    <div class="tab-pane fade" id="inventario" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Inventario del Laboratorio</h5>
+            {% if user.user_level >= 3 %}
+            <button class="btn btn-primary btn-sm" onclick="agregarItem()">
+                <i class="bi bi-plus"></i> Agregar Item
+            </button>
+            {% endif %}
+        </div>
+        
+        {% if inventario %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Nivel</th>
+                        <th>Unidad</th>
+                        <th>Proveedor</th>
+                        <th>Vencimiento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in inventario %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.nombre }}</strong><br>
+                            {% if item.ubicacion %}
+                            <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ item.ubicacion }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.categoria or '-' }}</td>
+                        <td>
+                            {{ item.cantidad_actual }} / {{ item.cantidad_minima }}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'danger' if item.nivel_stock == 'critico' else 'warning' if item.nivel_stock == 'bajo' else 'success' }}">
+                                {{ item.nivel_stock.title() }}
+                            </span>
+                        </td>
+                        <td>{{ item.unidad or '-' }}</td>
+                        <td>{{ item.proveedor or '-' }}</td>
+                        <td>{{ item.vencimiento or '-' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="verItem({{ item.id }})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                {% if user.user_level >= 2 %}
+                                <button class="btn btn-outline-secondary" onclick="editarItem({{ item.id }})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-box fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No hay items de inventario registrados en este laboratorio</p>
+            {% if user.user_level >= 3 %}
+            <button class="btn btn-primary" onclick="agregarItem()">
+                <i class="bi bi-plus"></i> Agregar Primer Item
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Tab Reservas -->
+    <div class="tab-pane fade" id="reservas" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Reservas del Laboratorio</h5>
+            <button class="btn btn-primary btn-sm" onclick="nuevaReserva()">
+                <i class="bi bi-plus"></i> Nueva Reserva
+            </button>
+        </div>
+        
+        <div class="text-center py-5">
+            <i class="bi bi-calendar fs-1 text-muted"></i>
+            <p class="text-muted mt-2">Funcionalidad de reservas en desarrollo</p>
+            <p class="small text-muted">Próximamente: calendario de reservas específico por laboratorio</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funciones de gestión
+function agregarEquipo() {
+    const laboratorioId = {{ laboratorio.id }};
+    // Implementar modal de agregar equipo
+    alert(`Agregar equipo al laboratorio ${laboratorioId}`);
+}
+
+function agregarItem() {
+    const laboratorioId = {{ laboratorio.id }};
+    // Implementar modal de agregar item
+    alert(`Agregar item al laboratorio ${laboratorioId}`);
+}
+
+function verEquipo(equipoId) {
+    // Redirigir a detalle de equipo
+    window.location.href = `/equipos/${equipoId}`;
+}
+
+function verItem(itemId) {
+    // Implementar vista de detalle de item
+    alert(`Ver item ${itemId}`);
+}
+
+function editarEquipo(equipoId) {
+    // Implementar edición de equipo
+    alert(`Editar equipo ${equipoId}`);
+}
+
+function editarItem(itemId) {
+    // Implementar edición de item
+    alert(`Editar item ${itemId}`);
+}
+
+function editarLaboratorio() {
+    const nuevoEstado = prompt('Cambiar estado del laboratorio:\n\nOpciones: activo, mantenimiento, inactivo', '{{ laboratorio.estado }}');
+    
+    if (nuevoEstado && ['activo', 'mantenimiento', 'inactivo'].includes(nuevoEstado.toLowerCase())) {
+        fetch('/api/laboratorios/{{ laboratorio.id }}', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({estado: nuevoEstado.toLowerCase()})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success || data.message) {
+                alert('Estado actualizado correctamente');
+                location.reload();
+            } else {
+                alert('Error actualizando estado');
+            }
+        })
+        .catch(err => {
+            alert('Error: ' + err.message);
+        });
+    } else if (nuevoEstado !== null) {
+        alert('Estado inválido. Use: activo, mantenimiento o inactivo');
+    }
+}
+
+function nuevaReserva() {
+    // Implementar nueva reserva
+    alert('Nueva reserva para este laboratorio');
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    // Activar tooltips si los hay
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

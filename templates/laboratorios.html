@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% set title = 'Laboratorios y Aulas' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">🏫 Laboratorios y Aulas</h1>
+    {% if user.user_level >= 3 %}
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoLaboratorio">
+        <i class="bi bi-plus-circle"></i> Nuevo Laboratorio
+    </button>
+    {% endif %}
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" id="filtroNombre" placeholder="Buscar por nombre o código...">
+        </div>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" id="filtroTipo">
+            <option value="">Todos los tipos</option>
+            <option value="laboratorio">Laboratorios</option>
+            <option value="aula">Aulas</option>
+            <option value="taller">Talleres</option>
+            <option value="almacen">Almacenes</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" id="filtroEstado">
+            <option value="activo">Activos</option>
+            <option value="">Todos los estados</option>
+            <option value="mantenimiento">En mantenimiento</option>
+            <option value="inactivo">Inactivos</option>
+        </select>
+    </div>
+</div>
+
+<!-- Resumen por tipo -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3"><i class="bi bi-flask fs-1"></i></div>
+                    <div>
+                        <div class="fs-6">Laboratorios</div>
+                        <div class="fs-4 fw-bold" id="countLaboratorios">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3"><i class="bi bi-book fs-1"></i></div>
+                    <div>
+                        <div class="fs-6">Aulas</div>
+                        <div class="fs-4 fw-bold" id="countAulas">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3"><i class="bi bi-tools fs-1"></i></div>
+                    <div>
+                        <div class="fs-6">Talleres</div>
+                        <div class="fs-4 fw-bold" id="countTalleres">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3"><i class="bi bi-archive fs-1"></i></div>
+                    <div>
+                        <div class="fs-6">Almacenes</div>
+                        <div class="fs-4 fw-bold" id="countAlmacenes">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de laboratorios -->
+<div class="row" id="laboratoriosList">
+    {% for lab in laboratorios %}
+    <div class="col-lg-6 mb-4 laboratorio-card" 
+         data-tipo="{{ lab.tipo }}" 
+         data-estado="{{ lab.estado }}"
+         data-nombre="{{ lab.nombre.lower() }} {{ lab.codigo.lower() }}">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        {% if lab.tipo == 'laboratorio' %}🧪
+                        {% elif lab.tipo == 'aula' %}📚
+                        {% elif lab.tipo == 'taller' %}🔧
+                        {% else %}📦{% endif %}
+                        {{ lab.codigo }}
+                    </h5>
+                    <small class="text-muted">{{ lab.tipo.title() }}</small>
+                </div>
+                <span class="badge bg-{{ 'success' if lab.estado == 'activo' else 'warning' if lab.estado == 'mantenimiento' else 'secondary' }}">
+                    {{ lab.estado.title() }}
+                </span>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">{{ lab.nombre }}</h6>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="bi bi-geo-alt"></i> {{ lab.ubicacion or 'Sin ubicación' }}<br>
+                        {% if lab.capacidad_estudiantes > 0 %}
+                        <i class="bi bi-people"></i> Capacidad: {{ lab.capacidad_estudiantes }} estudiantes<br>
+                        {% endif %}
+                        <i class="bi bi-person"></i> {{ lab.responsable or 'Sin responsable asignado' }}
+                    </small>
+                </p>
+                
+                <!-- Estadísticas -->
+                <div class="row text-center mt-3">
+                    <div class="col-4">
+                        <div class="fw-bold text-primary">{{ lab.total_equipos }}</div>
+                        <small class="text-muted">Equipos</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="fw-bold text-info">{{ lab.total_items }}</div>
+                        <small class="text-muted">Items</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="fw-bold text-{{ 'danger' if lab.items_criticos > 0 else 'success' }}">
+                            {{ lab.items_criticos }}
+                        </div>
+                        <small class="text-muted">Críticos</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('laboratorio_detalle', laboratorio_id=lab.id) }}" 
+                       class="btn btn-outline-primary btn-sm flex-fill">
+                        <i class="bi bi-eye"></i> Ver Detalle
+                    </a>
+                    {% if user.user_level >= 3 %}
+                    <button class="btn btn-outline-secondary btn-sm" 
+                            onclick="editarLaboratorio({{ lab.id }})">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal Nuevo Laboratorio -->
+{% if user.user_level >= 3 %}
+<div class="modal fade" id="modalNuevoLaboratorio" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Laboratorio/Aula</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formNuevoLaboratorio">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Código *</label>
+                                <input type="text" class="form-control" name="codigo" required 
+                                       placeholder="Ej: LAB-QUI-001">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tipo *</label>
+                                <select class="form-select" name="tipo" required>
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="laboratorio">Laboratorio</option>
+                                    <option value="aula">Aula</option>
+                                    <option value="taller">Taller</option>
+                                    <option value="almacen">Almacén</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" name="nombre" required 
+                               placeholder="Ej: Laboratorio de Química General">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ubicación</label>
+                        <input type="text" class="form-control" name="ubicacion" 
+                               placeholder="Ej: Edificio A - Piso 2">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Capacidad Estudiantes</label>
+                                <input type="number" class="form-control" name="capacidad_estudiantes" 
+                                       min="0" placeholder="25">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Área (m²)</label>
+                                <input type="number" class="form-control" name="area_m2" 
+                                       step="0.01" min="0" placeholder="80.5">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Responsable</label>
+                        <input type="text" class="form-control" name="responsable" 
+                               placeholder="Nombre del instructor o responsable">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Equipamiento Especializado</label>
+                        <textarea class="form-control" name="equipamiento_especializado" rows="2"
+                                  placeholder="Descripción del equipamiento especial..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Normas de Seguridad</label>
+                        <textarea class="form-control" name="normas_seguridad" rows="2"
+                                  placeholder="Normas y protocolos de seguridad..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Laboratorio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar contadores
+    actualizarContadores();
+    
+    // Filtros
+    const filtroNombre = document.getElementById('filtroNombre');
+    const filtroTipo = document.getElementById('filtroTipo');
+    const filtroEstado = document.getElementById('filtroEstado');
+    
+    [filtroNombre, filtroTipo, filtroEstado].forEach(filtro => {
+        filtro.addEventListener('input', aplicarFiltros);
+        filtro.addEventListener('change', aplicarFiltros);
+    });
+    
+    // Form nuevo laboratorio
+    {% if user.user_level >= 3 %}
+    document.getElementById('formNuevoLaboratorio').addEventListener('submit', function(e) {
+        e.preventDefault();
+        crearLaboratorio();
+    });
+    {% endif %}
+});
+
+function actualizarContadores() {
+    const cards = document.querySelectorAll('.laboratorio-card');
+    const contadores = {
+        laboratorio: 0,
+        aula: 0,
+        taller: 0,
+        almacen: 0
+    };
+    
+    cards.forEach(card => {
+        if (card.style.display !== 'none') {
+            const tipo = card.dataset.tipo;
+            contadores[tipo]++;
+        }
+    });
+    
+    document.getElementById('countLaboratorios').textContent = contadores.laboratorio;
+    document.getElementById('countAulas').textContent = contadores.aula;
+    document.getElementById('countTalleres').textContent = contadores.taller;
+    document.getElementById('countAlmacenes').textContent = contadores.almacen;
+}
+
+function aplicarFiltros() {
+    const filtroNombre = document.getElementById('filtroNombre').value.toLowerCase();
+    const filtroTipo = document.getElementById('filtroTipo').value;
+    const filtroEstado = document.getElementById('filtroEstado').value;
+    
+    document.querySelectorAll('.laboratorio-card').forEach(card => {
+        const nombre = card.dataset.nombre;
+        const tipo = card.dataset.tipo;
+        const estado = card.dataset.estado;
+        
+        const coincideNombre = !filtroNombre || nombre.includes(filtroNombre);
+        const coincideTipo = !filtroTipo || tipo === filtroTipo;
+        const coincideEstado = !filtroEstado || estado === filtroEstado;
+        
+        if (coincideNombre && coincideTipo && coincideEstado) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    actualizarContadores();
+}
+
+{% if user.user_level >= 3 %}
+function crearLaboratorio() {
+    const form = document.getElementById('formNuevoLaboratorio');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    fetch('/api/laboratorios', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.message) {
+            alert(result.message);
+            if (!result.message.includes('Error')) {
+                location.reload();
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error creando laboratorio');
+    });
+}
+
+function editarLaboratorio(id) {
+    // Redirigir a la página de detalle del laboratorio
+    window.location.href = `/laboratorio/${id}`;
+}
+{% endif %}
+</script>
+{% endblock %}

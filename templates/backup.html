@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% set title = 'Backup de Base de Datos' %}
+{% block content %}
+<style>
+    .backup-header {
+        background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .backup-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .backup-item {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    .backup-item:hover {
+        border-color: #2d6a4f;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    .backup-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5em;
+    }
+    .btn-create-backup {
+        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-create-backup:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+        color: white;
+    }
+    .warning-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="backup-header">
+    <i class="bi bi-database" style="font-size: 3em; margin-bottom: 15px;"></i>
+    <h1>Gestión de Backups</h1>
+    <p class="mb-0">Crea y restaura copias de seguridad de la base de datos</p>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category=='error' else category }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="backup-card">
+            <h4 class="mb-4"><i class="bi bi-plus-circle me-2"></i>Crear Nuevo Backup</h4>
+            
+            <div class="warning-box">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <small><strong>Importante:</strong> El proceso puede tardar varios minutos dependiendo del tamaño de la base de datos.</small>
+            </div>
+
+            <form method="POST" action="{{ url_for('backup') }}">
+                <input type="hidden" name="action" value="create">
+                <div class="d-grid">
+                    <button type="submit" class="btn-create-backup">
+                        <i class="bi bi-cloud-arrow-up me-2"></i>Crear Backup Ahora
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <h6 class="mb-3">Información del Backup</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Incluye todas las tablas
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Incluye procedimientos y triggers
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Formato SQL estándar
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Compresión automática
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="backup-card">
+            <h4 class="mb-4"><i class="bi bi-archive me-2"></i>Backups Disponibles ({{ backups|length }})</h4>
+
+            {% if backups %}
+                {% for backup in backups %}
+                <div class="backup-item">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="backup-icon">
+                                <i class="bi bi-file-earmark-zip"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-1">{{ backup.nombre }}</h6>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar me-1"></i>{{ backup.fecha }}
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-hdd me-1"></i>{{ backup.tamaño }}
+                            </small>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-sm btn-outline-success" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalRestore"
+                                    data-backup="{{ backup.nombre }}">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Restaurar
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-2">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4em; color: #ccc;"></i>
+                    <p class="text-muted mt-3">No hay backups disponibles</p>
+                    <p class="text-muted">Crea tu primer backup usando el botón de la izquierda</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="backup-card">
+            <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Recomendaciones</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="alert alert-success">
+                        <strong>✓ Buenas Prácticas:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Crear backups diarios</li>
+                            <li>Mantener al menos 7 backups</li>
+                            <li>Verificar backups periódicamente</li>
+                            <li>Guardar copias en ubicación externa</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Precauciones:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Restaurar cierra todas las conexiones</li>
+                            <li>Los datos actuales se sobrescriben</li>
+                            <li>El proceso no se puede deshacer</li>
+                            <li>Notifica a los usuarios antes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Restauración -->
+<div class="modal fade" id="modalRestore" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Restauración
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-shield-exclamation me-2"></i>
+                    <strong>¡ADVERTENCIA!</strong> Esta acción sobrescribirá todos los datos actuales de la base de datos.
+                </div>
+                <p>¿Estás seguro de que deseas restaurar este backup?</p>
+                <p class="mb-0"><strong>Archivo:</strong> <span id="backupFileName"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('backup') }}" style="display: inline;">
+                    <input type="hidden" name="action" value="restore">
+                    <input type="hidden" name="backup_file" id="backupFileInput">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Sí, Restaurar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Pasar nombre del backup al modal
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalRestore = document.getElementById('modalRestore');
+        if (modalRestore) {
+            modalRestore.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const backupName = button.getAttribute('data-backup');
+                document.getElementById('backupFileName').textContent = backupName;
+                document.getElementById('backupFileInput').value = backupName;
+            });
+        }
+    });
+</script>
+
+{% endblock %}

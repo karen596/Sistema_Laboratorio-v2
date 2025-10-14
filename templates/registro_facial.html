@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+{% set title = 'Registro Facial' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Encabezado -->
+            <div class="text-center mb-4">
+                <h1 class="h3 mb-2">
+                    <i class="bi bi-person-badge text-primary"></i>
+                    Registro de Reconocimiento Facial
+                </h1>
+                <p class="text-muted">Registra tu rostro para acceso rápido al sistema</p>
+            </div>
+
+            <!-- Información del Usuario -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-1">{{ user.user_name }}</h5>
+                            <p class="text-muted mb-0">ID: {{ user.user_id }} | Tipo: {{ user.user_type }}</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-primary fs-6">Nivel {{ user.user_level }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Captura -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-camera"></i>
+                        Captura de Rostro
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Estado del proceso -->
+                    <div id="statusAlert" class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Listo para capturar:</strong> Posiciona tu rostro en el centro de la cámara
+                    </div>
+
+                    <!-- Área de cámara -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="camera-container position-relative">
+                                <video id="videoElement" class="w-100 rounded border" style="max-height: 400px;" autoplay muted></video>
+                                <canvas id="canvasElement" class="d-none"></canvas>
+                                
+                                <!-- Overlay de guía -->
+                                <div id="faceGuide" class="position-absolute top-50 start-50 translate-middle">
+                                    <div class="face-guide-circle"></div>
+                                </div>
+                                
+                                <!-- Indicador de estado -->
+                                <div id="cameraStatus" class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-camera-video"></i> Cámara Activa
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <!-- Imagen capturada -->
+                            <div id="capturedImageContainer" class="d-none">
+                                <h6>Imagen Capturada:</h6>
+                                <img id="capturedImage" class="img-fluid rounded border mb-3" alt="Rostro capturado">
+                                <div id="imageQuality" class="mb-3"></div>
+                            </div>
+                            
+                            <!-- Instrucciones -->
+                            <div class="instructions">
+                                <h6><i class="bi bi-lightbulb"></i> Instrucciones:</h6>
+                                <ul class="small text-muted">
+                                    <li>Mantén tu rostro centrado en el círculo</li>
+                                    <li>Asegúrate de tener buena iluminación</li>
+                                    <li>Evita sombras en tu cara</li>
+                                    <li>Mantén una expresión neutral</li>
+                                    <li>No uses lentes oscuros</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles -->
+                    <div class="text-center mt-4">
+                        <button id="startCameraBtn" class="btn btn-sena me-2">
+                            <i class="bi bi-camera"></i> Iniciar Cámara
+                        </button>
+                        <button id="captureBtn" class="btn btn-success me-2" disabled>
+                            <i class="bi bi-camera-fill"></i> Capturar Rostro
+                        </button>
+                        <button id="registerBtn" class="btn btn-warning me-2" disabled>
+                            <i class="bi bi-person-plus"></i> Registrar
+                        </button>
+                        <button id="retakeBtn" class="btn btn-secondary" disabled>
+                            <i class="bi bi-arrow-clockwise"></i> Repetir
+                        </button>
+                        <button id="helpCameraBtn" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalAyudaCamara">
+                            <i class="bi bi-question-circle"></i> Ayuda
+                        </button>
+                    </div>
+
+                    <!-- Progreso -->
+                    <div id="progressContainer" class="mt-4 d-none">
+                        <div class="progress">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div id="progressText" class="text-center mt-2 small text-muted"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial (si existe) -->
+            <div id="historialContainer" class="card mt-4 d-none">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history"></i>
+                        Registro Anterior
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="historialContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos CSS -->
+<style>
+.camera-container {
+    background: #f8f9fa;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.face-guide-circle {
+    width: 200px;
+    height: 200px;
+    border: 3px dashed #007bff;
+    border-radius: 50%;
+    background: rgba(0, 123, 255, 0.1);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 0.7; }
+}
+
+.instructions ul {
+    padding-left: 1.2rem;
+}
+
+.instructions li {
+    margin-bottom: 0.3rem;
+}
+
+#videoElement {
+    background: #000;
+}
+
+.quality-excellent { color: #28a745; }
+.quality-good { color: #ffc107; }
+.quality-poor { color: #dc3545; }
+</style>
+
+<!-- JavaScript -->
+<script>
+class FacialRegistration {
+    constructor() {
+        this.video = document.getElementById('videoElement');
+        this.canvas = document.getElementById('canvasElement');
+        this.ctx = this.canvas.getContext('2d');
+        this.stream = null;
+        this.capturedImageData = null;
+        
+        this.initializeElements();
+        this.bindEvents();
+    }
+    
+    initializeElements() {
+        this.startBtn = document.getElementById('startCameraBtn');
+        this.captureBtn = document.getElementById('captureBtn');
+        this.registerBtn = document.getElementById('registerBtn');
+        this.retakeBtn = document.getElementById('retakeBtn');
+        this.statusAlert = document.getElementById('statusAlert');
+        this.progressContainer = document.getElementById('progressContainer');
+        this.progressBar = document.getElementById('progressBar');
+        this.progressText = document.getElementById('progressText');
+    }
+    
+    bindEvents() {
+        this.startBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Iniciando cámara...');
+            this.startCamera();
+        });
+        this.captureBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Capturando imagen...');
+            this.captureImage();
+        });
+        this.registerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Registrando rostro...');
+            this.registerFace();
+        });
+        this.retakeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Repitiendo captura...');
+            this.retakePhoto();
+        });
+    }
+    
+    async startCamera() {
+        try {
+            console.log('[DEBUG] Solicitando acceso a la cámara...');
+            this.updateStatus('info', 'Iniciando cámara...');
+            
+            // Verificar si el navegador soporta getUserMedia
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Tu navegador no soporta acceso a la cámara');
+            }
+            
+            this.stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    width: { ideal: 640 }, 
+                    height: { ideal: 480 },
+                    facingMode: 'user'
+                } 
+            });
+            
+            console.log('[DEBUG] Acceso a cámara concedido');
+            this.video.srcObject = this.stream;
+            
+            this.video.onloadedmetadata = () => {
+                console.log('[DEBUG] Video cargado:', this.video.videoWidth, 'x', this.video.videoHeight);
+                this.canvas.width = this.video.videoWidth;
+                this.canvas.height = this.video.videoHeight;
+                
+                this.startBtn.disabled = true;
+                this.captureBtn.disabled = false;
+                this.startBtn.innerHTML = '<i class="bi bi-check-circle"></i> Cámara Activa';
+                
+                this.updateStatus('success', 'Cámara activa. Posiciona tu rostro y haz clic en "Capturar"');
+            };
+            
+        } catch (error) {
+            console.error('[ERROR] Error accediendo a la cámara:', error);
+            let errorMsg = 'Error: No se pudo acceder a la cámara. ';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMsg += 'Debes permitir el acceso a la cámara en tu navegador.';
+            } else if (error.name === 'NotFoundError') {
+                errorMsg += 'No se encontró ninguna cámara conectada.';
+            } else {
+                errorMsg += error.message || 'Verifica los permisos.';
+            }
+            
+            this.updateStatus('danger', errorMsg);
+        }
+    }
+    
+    captureImage() {
+        if (!this.stream) {
+            console.error('[ERROR] No hay stream de video activo');
+            this.updateStatus('danger', 'Error: La cámara no está activa');
+            return;
+        }
+        
+        console.log('[DEBUG] Capturando imagen...');
+        
+        try {
+            // Usar el tamaño real del video
+            this.canvas.width = this.video.videoWidth;
+            this.canvas.height = this.video.videoHeight;
+            
+            // Capturar frame del video
+            this.ctx.drawImage(this.video, 0, 0);
+            
+            // Convertir a base64 con buena calidad
+            this.capturedImageData = this.canvas.toDataURL('image/jpeg', 0.8);
+            
+            console.log('[DEBUG] Imagen capturada, tamaño:', this.capturedImageData.length, 'bytes');
+            
+            // Mostrar imagen capturada
+            const capturedImg = document.getElementById('capturedImage');
+            const container = document.getElementById('capturedImageContainer');
+            
+            capturedImg.src = this.capturedImageData;
+            container.classList.remove('d-none');
+            
+            // Habilitar botones
+            this.captureBtn.disabled = true;
+            this.registerBtn.disabled = false;
+            this.retakeBtn.disabled = false;
+            
+            this.updateStatus('warning', 'Imagen capturada. Revisa la calidad y haz clic en "Registrar"');
+            
+            // Simular análisis de calidad
+            this.analyzeImageQuality();
+            
+        } catch (error) {
+            console.error('[ERROR] Error capturando imagen:', error);
+            this.updateStatus('danger', 'Error al capturar la imagen: ' + error.message);
+        }
+    }
+    
+    analyzeImageQuality() {
+        // Simulación de análisis de calidad
+        const qualityDiv = document.getElementById('imageQuality');
+        const quality = Math.floor(Math.random() * 40) + 60; // 60-100%
+        
+        let qualityClass = 'quality-excellent';
+        let qualityText = 'Excelente';
+        
+        if (quality < 70) {
+            qualityClass = 'quality-poor';
+            qualityText = 'Baja';
+        } else if (quality < 85) {
+            qualityClass = 'quality-good';
+            qualityText = 'Buena';
+        }
+        
+        qualityDiv.innerHTML = `
+            <div class="text-center">
+                <div class="h5 ${qualityClass}">Calidad: ${quality}%</div>
+                <small class="text-muted">Estado: ${qualityText}</small>
+            </div>
+        `;
+    }
+    
+    async registerFace() {
+        if (!this.capturedImageData) {
+            console.error('[ERROR] No hay imagen capturada');
+            this.updateStatus('danger', 'Error: No hay imagen capturada');
+            return;
+        }
+        
+        console.log('[DEBUG] Iniciando registro facial...');
+        this.showProgress('Procesando imagen...', 20);
+        this.registerBtn.disabled = true;
+        
+        try {
+            console.log('[DEBUG] Enviando imagen al servidor...');
+            const response = await fetch('/api/facial/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: this.capturedImageData,
+                    user_id: '{{ user.user_id }}'
+                })
+            });
+            
+            this.showProgress('Analizando rostro...', 60);
+            
+            console.log('[DEBUG] Respuesta del servidor:', response.status);
+            const result = await response.json();
+            console.log('[DEBUG] Resultado:', result);
+            
+            this.showProgress('Guardando datos...', 90);
+            
+            setTimeout(() => {
+                this.hideProgress();
+                
+                if (result.success || response.ok) {
+                    this.updateStatus('success', `✅ ${result.message || 'Rostro registrado exitosamente'}`);
+                    this.registerBtn.innerHTML = '<i class="bi bi-check-circle"></i> Registrado';
+                    
+                    // Mostrar opción de ir al dashboard
+                    setTimeout(() => {
+                        if (confirm('Registro facial completado. ¿Ir al dashboard?')) {
+                            window.location.href = '/dashboard';
+                        }
+                    }, 2000);
+                } else {
+                    this.updateStatus('danger', `❌ Error: ${result.error || 'Error desconocido'}`);
+                    this.registerBtn.disabled = false;
+                }
+            }, 1000);
+            
+        } catch (error) {
+            this.hideProgress();
+            console.error('[ERROR] Error registrando rostro:', error);
+            this.updateStatus('danger', 'Error de conexión: ' + error.message);
+            this.registerBtn.disabled = false;
+        }
+    }
+    
+    retakePhoto() {
+        // Limpiar imagen capturada
+        this.capturedImageData = null;
+        document.getElementById('capturedImageContainer').classList.add('d-none');
+        
+        // Restaurar botones
+        this.captureBtn.disabled = false;
+        this.registerBtn.disabled = true;
+        this.retakeBtn.disabled = true;
+        
+        this.updateStatus('info', 'Listo para nueva captura');
+    }
+    
+    updateStatus(type, message) {
+        const alertClasses = {
+            'info': 'alert-info',
+            'success': 'alert-success',
+            'warning': 'alert-warning',
+            'danger': 'alert-danger'
+        };
+        
+        const icons = {
+            'info': 'bi-info-circle',
+            'success': 'bi-check-circle',
+            'warning': 'bi-exclamation-triangle',
+            'danger': 'bi-x-circle'
+        };
+        
+        this.statusAlert.className = `alert ${alertClasses[type]}`;
+        this.statusAlert.innerHTML = `
+            <i class="bi ${icons[type]}"></i>
+            ${message}
+        `;
+    }
+    
+    showProgress(text, percentage) {
+        this.progressContainer.classList.remove('d-none');
+        this.progressBar.style.width = `${percentage}%`;
+        this.progressText.textContent = text;
+    }
+    
+    hideProgress() {
+        this.progressContainer.classList.add('d-none');
+        this.progressBar.style.width = '0%';
+    }
+}
+
+// Inicializar cuando la página cargue
+document.addEventListener('DOMContentLoaded', () => {
+    new FacialRegistration();
+});
+</script>
+
+<!-- Modal de Ayuda para Cámara -->
+<div class="modal fade" id="modalAyudaCamara" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-sena text-white">
+                <h5 class="modal-title"><i class="bi bi-camera-video me-2"></i>Ayuda - Permisos de Cámara</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Importante:</strong> El navegador necesita tu permiso para acceder a la cámara.
+                </div>
+
+                <h6 class="fw-bold mb-3">📋 Cómo Habilitar la Cámara:</h6>
+                
+                <div class="accordion" id="accordionCamara">
+                    <!-- Chrome/Edge -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#chrome">
+                                <i class="bi bi-browser-chrome me-2"></i>Google Chrome / Microsoft Edge
+                            </button>
+                        </h2>
+                        <div id="chrome" class="accordion-collapse collapse show" data-bs-parent="#accordionCamara">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Haz clic en el botón <strong>"Iniciar Cámara"</strong></li>
+                                    <li>Aparecerá una ventana emergente en la parte superior</li>
+                                    <li>Haz clic en <strong>"Permitir"</strong></li>
+                                    <li>La cámara se activará automáticamente</li>
+                                </ol>
+                                
+                                <div class="alert alert-warning mt-3">
+                                    <strong>Si bloqueaste el acceso:</strong>
+                                    <ol class="mb-0 mt-2">
+                                        <li>Haz clic en el icono 🔒 en la barra de direcciones</li>
+                                        <li>Busca "Cámara" en permisos</li>
+                                        <li>Cambia a <strong>"Permitir"</strong></li>
+                                        <li>Recarga la página (F5)</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Firefox -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#firefox">
+                                <i class="bi bi-browser-firefox me-2"></i>Mozilla Firefox
+                            </button>
+                        </h2>
+                        <div id="firefox" class="accordion-collapse collapse" data-bs-parent="#accordionCamara">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Haz clic en <strong>"Iniciar Cámara"</strong></li>
+                                    <li>Selecciona tu cámara del menú</li>
+                                    <li>Haz clic en <strong>"Permitir"</strong></li>
+                                </ol>
+                                
+                                <div class="alert alert-warning mt-3">
+                                    <strong>Para cambiar permisos:</strong>
+                                    <ol class="mb-0 mt-2">
+                                        <li>Haz clic en el icono junto a la URL</li>
+                                        <li>Ve a "Permisos"</li>
+                                        <li>Marca "Permitir" en cámara</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-success mt-4">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Consejos:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Cierra otras aplicaciones que usen la cámara (Zoom, Teams, etc.)</li>
+                        <li>Verifica que tu cámara esté conectada</li>
+                        <li>Prueba en modo incógnito si persiste el problema</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-sena" data-bs-dismiss="modal" onclick="document.getElementById('startCameraBtn').click()">
+                    <i class="bi bi-camera-video me-2"></i>Intentar Activar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

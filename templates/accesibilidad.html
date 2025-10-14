@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accesibilidad - Centro Minero SENA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        body.alto-contraste {
+            background: #000;
+            color: #fff;
+        }
+
+        body.texto-grande {
+            font-size: 120%;
+        }
+
+        body.modo-oscuro {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.animaciones-reducidas * {
+            animation: none !important;
+            transition: none !important;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+
+        body.alto-contraste .container {
+            background: #000;
+            border: 3px solid #fff;
+        }
+
+        body.modo-oscuro .container {
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2d6a4f;
+        }
+
+        body.alto-contraste .header {
+            border-bottom-color: #fff;
+        }
+
+        .header h1 {
+            color: #1e5128;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        body.alto-contraste .header h1 {
+            color: #fff;
+        }
+
+        body.modo-oscuro .header h1 {
+            color: #4ade80;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        body.alto-contraste .subtitle {
+            color: #fff;
+        }
+
+        body.modo-oscuro .subtitle {
+            color: #a0a0a0;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2d6a4f;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        body.alto-contraste .section-title {
+            color: #fff;
+        }
+
+        body.modo-oscuro .section-title {
+            color: #4ade80;
+        }
+
+        .option {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        body.alto-contraste .option {
+            background: #000;
+            border: 2px solid #fff;
+        }
+
+        body.modo-oscuro .option {
+            background: #333;
+        }
+
+        .option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .option-info {
+            flex: 1;
+        }
+
+        .option-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1e5128;
+            margin-bottom: 5px;
+        }
+
+        body.alto-contraste .option-title {
+            color: #fff;
+        }
+
+        body.modo-oscuro .option-title {
+            color: #e0e0e0;
+        }
+
+        .option-description {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        body.alto-contraste .option-description {
+            color: #ccc;
+        }
+
+        body.modo-oscuro .option-description {
+            color: #a0a0a0;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2d6a4f;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2d6a4f;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        body.alto-contraste input:checked + .slider {
+            background-color: #fff;
+        }
+
+        body.alto-contraste input:checked + .slider:before {
+            background-color: #000;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2d6a4f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e5128;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        body.alto-contraste .btn {
+            border: 2px solid #fff;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        body.alto-contraste .alert-success {
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+        }
+
+        .keyboard-shortcuts {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        body.alto-contraste .keyboard-shortcuts {
+            background: #000;
+            border: 2px solid #fff;
+        }
+
+        body.modo-oscuro .keyboard-shortcuts {
+            background: #333;
+        }
+
+        .shortcut {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        body.alto-contraste .shortcut {
+            border-bottom-color: #fff;
+        }
+
+        .shortcut:last-child {
+            border-bottom: none;
+        }
+
+        .key {
+            background: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        body.alto-contraste .key {
+            background: #000;
+            color: #fff;
+            border-color: #fff;
+        }
+
+        body.modo-oscuro .key {
+            background: #1a1a1a;
+            border-color: #555;
+        }
+
+        /* Skip to content link */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #2d6a4f;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link" tabindex="1">Saltar al contenido principal</a>
+
+    <div class="container" id="main-content" role="main">
+        <div class="header">
+            <h1>♿ Configuración de Accesibilidad</h1>
+            <p class="subtitle">Personaliza tu experiencia para una mejor navegación</p>
+        </div>
+
+        <div class="alert alert-success" id="alert" role="alert" aria-live="polite">
+            ✓ Configuración guardada exitosamente
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">
+                <span aria-hidden="true">👁️</span>
+                <span>Opciones Visuales</span>
+            </h2>
+
+            <div class="option">
+                <div class="option-info">
+                    <div class="option-title">Alto Contraste</div>
+                    <div class="option-description">Aumenta el contraste entre texto y fondo para mejor legibilidad</div>
+                </div>
+                <label class="switch" aria-label="Activar alto contraste">
+                    <input type="checkbox" id="alto-contraste" aria-describedby="desc-contraste">
+                    <span class="slider"></span>
+                </label>
+                <span id="desc-contraste" class="sr-only">Modo de alto contraste para personas con baja visión</span>
+            </div>
+
+            <div class="option">
+                <div class="option-info">
+                    <div class="option-title">Texto Grande</div>
+                    <div class="option-description">Aumenta el tamaño de todo el texto en un 20%</div>
+                </div>
+                <label class="switch" aria-label="Activar texto grande">
+                    <input type="checkbox" id="texto-grande">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="option">
+                <div class="option-info">
+                    <div class="option-title">Modo Oscuro</div>
+                    <div class="option-description">Reduce el brillo de la pantalla con colores oscuros</div>
+                </div>
+                <label class="switch" aria-label="Activar modo oscuro">
+                    <input type="checkbox" id="modo-oscuro">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">
+                <span aria-hidden="true">⚡</span>
+                <span>Opciones de Movimiento</span>
+            </h2>
+
+            <div class="option">
+                <div class="option-info">
+                    <div class="option-title">Reducir Animaciones</div>
+                    <div class="option-description">Desactiva transiciones y animaciones que pueden causar mareos</div>
+                </div>
+                <label class="switch" aria-label="Reducir animaciones">
+                    <input type="checkbox" id="animaciones-reducidas">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">
+                <span aria-hidden="true">🔊</span>
+                <span>Opciones de Audio</span>
+            </h2>
+
+            <div class="option">
+                <div class="option-info">
+                    <div class="option-title">Lector de Pantalla</div>
+                    <div class="option-description">Optimiza la interfaz para lectores de pantalla (NVDA, JAWS)</div>
+                </div>
+                <label class="switch" aria-label="Optimizar para lector de pantalla">
+                    <input type="checkbox" id="lector-pantalla">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="keyboard-shortcuts">
+            <h3 style="margin-bottom: 15px;">⌨️ Atajos de Teclado</h3>
+            <div class="shortcut">
+                <span>Ir al contenido principal</span>
+                <span class="key">Tab</span>
+            </div>
+            <div class="shortcut">
+                <span>Navegar entre elementos</span>
+                <span class="key">Tab / Shift+Tab</span>
+            </div>
+            <div class="shortcut">
+                <span>Activar elemento</span>
+                <span class="key">Enter / Espacio</span>
+            </div>
+            <div class="shortcut">
+                <span>Cerrar sesión</span>
+                <span class="key">Alt+L</span>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" id="guardar" onclick="guardarPreferencias()">
+                💾 Guardar Configuración
+            </button>
+            <a href="/dashboard" class="btn btn-secondary">
+                ← Volver al Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Cargar preferencias guardadas
+        async function cargarPreferencias() {
+            try {
+                const response = await fetch('/api/accesibilidad/preferencias');
+                const prefs = await response.json();
+                
+                document.getElementById('alto-contraste').checked = prefs.alto_contraste;
+                document.getElementById('texto-grande').checked = prefs.texto_grande;
+                document.getElementById('lector-pantalla').checked = prefs.lector_pantalla;
+                document.getElementById('animaciones-reducidas').checked = prefs.animaciones_reducidas;
+                document.getElementById('modo-oscuro').checked = prefs.modo_oscuro;
+                
+                aplicarPreferencias();
+            } catch (error) {
+                console.error('Error cargando preferencias:', error);
+            }
+        }
+
+        // Aplicar preferencias visuales
+        function aplicarPreferencias() {
+            const body = document.body;
+            
+            body.classList.toggle('alto-contraste', document.getElementById('alto-contraste').checked);
+            body.classList.toggle('texto-grande', document.getElementById('texto-grande').checked);
+            body.classList.toggle('animaciones-reducidas', document.getElementById('animaciones-reducidas').checked);
+            body.classList.toggle('modo-oscuro', document.getElementById('modo-oscuro').checked);
+            
+            // Anunciar cambios para lectores de pantalla
+            if (document.getElementById('lector-pantalla').checked) {
+                document.body.setAttribute('aria-live', 'polite');
+            }
+        }
+
+        // Guardar preferencias
+        async function guardarPreferencias() {
+            const preferencias = {
+                alto_contraste: document.getElementById('alto-contraste').checked,
+                texto_grande: document.getElementById('texto-grande').checked,
+                lector_pantalla: document.getElementById('lector-pantalla').checked,
+                animaciones_reducidas: document.getElementById('animaciones-reducidas').checked,
+                modo_oscuro: document.getElementById('modo-oscuro').checked
+            };
+            
+            try {
+                const response = await fetch('/api/accesibilidad/preferencias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(preferencias)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const alert = document.getElementById('alert');
+                    alert.style.display = 'block';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 3000);
+                    
+                    aplicarPreferencias();
+                }
+            } catch (error) {
+                console.error('Error guardando preferencias:', error);
+                alert('Error al guardar la configuración');
+            }
+        }
+
+        // Aplicar cambios en tiempo real
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', aplicarPreferencias);
+        });
+
+        // Atajos de teclado
+        document.addEventListener('keydown', (e) => {
+            // Alt+L para logout
+            if (e.altKey && e.key === 'l') {
+                window.location.href = '/logout';
+            }
+        });
+
+        // Cargar al iniciar
+        cargarPreferencias();
+    </script>
+</body>
+</html>

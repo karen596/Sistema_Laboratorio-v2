@@ -1,0 +1,768 @@
+{% extends 'base.html' %}
+{% set title = 'Dashboard' %}
+{% block content %}
+<style>
+  /* Estilos específicos del Dashboard Premium */
+  .dashboard-header {
+    background: linear-gradient(135deg, var(--sena-primary) 0%, var(--sena-primary-darker) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: var(--radius-2xl);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sena-lg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .dashboard-header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .welcome-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+  }
+
+  /* Tarjetas de Estadísticas Mejoradas */
+  .stat-card-premium {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-slow);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .stat-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    transition: width var(--transition);
+  }
+
+  .stat-card-premium.sena::before {
+    background: linear-gradient(180deg, var(--sena-primary), var(--sena-primary-light));
+  }
+
+  .stat-card-premium.cyan::before {
+    background: linear-gradient(180deg, var(--accent-cyan), var(--accent-cyan-light));
+  }
+
+  .stat-card-premium.amber::before {
+    background: linear-gradient(180deg, var(--accent-amber), var(--accent-amber-dark));
+  }
+
+  .stat-card-premium.blue::before {
+    background: linear-gradient(180deg, var(--accent-blue), var(--accent-blue-dark));
+  }
+
+  .stat-card-premium:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-6px);
+  }
+
+  .stat-card-premium:hover::before {
+    width: 8px;
+  }
+
+  .stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-icon-wrapper.sena {
+    background: linear-gradient(135deg, var(--sena-primary), var(--sena-primary-light));
+    color: white;
+  }
+
+  .stat-icon-wrapper.cyan {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan-light));
+    color: white;
+  }
+
+  .stat-icon-wrapper.amber {
+    background: linear-gradient(135deg, var(--accent-amber), #fbbf24);
+    color: white;
+  }
+
+  .stat-icon-wrapper.blue {
+    background: linear-gradient(135deg, var(--accent-blue), #60a5fa);
+    color: white;
+  }
+
+  .stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+  }
+
+  .stat-trend.up {
+    background: var(--status-success-bg);
+    color: var(--status-success);
+  }
+
+  .stat-trend.down {
+    background: var(--status-error-bg);
+    color: var(--status-error);
+  }
+
+  .stat-body {
+    margin-bottom: 1rem;
+  }
+
+  .stat-value-large {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--gray-900);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .stat-label-text {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+  }
+
+  /* Tarjetas de Acción Rápida */
+  .quick-action-card {
+    background: var(--bg-primary);
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all var(--transition);
+    cursor: pointer;
+    height: 100%;
+  }
+
+  .quick-action-card:hover {
+    border-color: var(--sena-primary);
+    background: var(--sena-primary-subtle);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-sena);
+  }
+
+  .quick-action-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    transition: all var(--transition);
+  }
+
+  .quick-action-card:hover .quick-action-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  /* Gráficos */
+  .chart-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    height: 100%;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+  }
+
+  .chart-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .chart-filter {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .chart-filter-btn {
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-300);
+    background: var(--bg-primary);
+    color: var(--gray-600);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .chart-filter-btn:hover {
+    border-color: var(--sena-primary);
+    color: var(--sena-primary);
+  }
+
+  .chart-filter-btn.active {
+    background: var(--sena-primary);
+    border-color: var(--sena-primary);
+    color: white;
+  }
+
+  /* Actividad Reciente */
+  .activity-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    height: 100%;
+  }
+
+  .activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--sena-primary);
+    transition: all var(--transition-fast);
+  }
+
+  .activity-item:hover {
+    background: var(--sena-primary-subtle);
+    transform: translateX(6px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.125rem;
+  }
+
+  .activity-icon.success {
+    background: var(--status-success-bg);
+    color: var(--status-success);
+  }
+
+  .activity-icon.info {
+    background: var(--status-info-bg);
+    color: var(--status-info);
+  }
+
+  .activity-icon.warning {
+    background: var(--status-warning-bg);
+    color: var(--status-warning);
+  }
+
+  .activity-content {
+    flex: 1;
+  }
+
+  .activity-title {
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 0.9375rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .activity-meta {
+    font-size: 0.8125rem;
+    color: var(--gray-500);
+  }
+
+  /* Sección de Módulos */
+  .module-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition);
+    text-decoration: none;
+    display: block;
+    height: 100%;
+  }
+
+  .module-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+    border-color: var(--sena-primary);
+  }
+
+  .module-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .module-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.5rem;
+  }
+
+  .module-description {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 0;
+  }
+</style>
+
+<!-- Header del Dashboard -->
+<div class="dashboard-header">
+  <div class="dashboard-header-content">
+    <div class="welcome-badge">
+      <i class="bi bi-shield-check"></i>
+      <span>Nivel de acceso: {{ user.get('user_level', 1) }}</span>
+    </div>
+    <h1 class="mb-2">
+      <i class="bi bi-speedometer2 me-2"></i>
+      Bienvenido, {{ user.get('nombre', 'Usuario') }}
+    </h1>
+    <p class="mb-0 opacity-90">
+      Sistema de Gestión de Laboratorios - Centro Minero SENA
+    </p>
+  </div>
+</div>
+
+<!-- Tarjetas de Estadísticas -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card-premium sena">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper sena">
+          <i class="bi bi-cpu"></i>
+        </div>
+        <div class="stat-trend up">
+          <i class="bi bi-arrow-up"></i>
+          <span>+12%</span>
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value-large">248</div>
+        <div class="stat-label-text">Equipos Activos</div>
+      </div>
+      <div class="stat-footer">
+        <i class="bi bi-clock"></i>
+        <span>Actualizado hace 5 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card-premium cyan">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper cyan">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+        <div class="stat-trend up">
+          <i class="bi bi-arrow-up"></i>
+          <span>+8%</span>
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value-large">42</div>
+        <div class="stat-label-text">Reservas Hoy</div>
+      </div>
+      <div class="stat-footer">
+        <i class="bi bi-clock"></i>
+        <span>Actualizado hace 2 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card-premium amber">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper amber">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-trend up">
+          <i class="bi bi-arrow-up"></i>
+          <span>+5%</span>
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value-large">1,234</div>
+        <div class="stat-label-text">Usuarios Activos</div>
+      </div>
+      <div class="stat-footer">
+        <i class="bi bi-clock"></i>
+        <span>Actualizado hace 1 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="stat-card-premium blue">
+      <div class="stat-header">
+        <div class="stat-icon-wrapper blue">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="stat-trend down">
+          <i class="bi bi-arrow-down"></i>
+          <span>-3%</span>
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value-large">3,567</div>
+        <div class="stat-label-text">Items Inventario</div>
+      </div>
+      <div class="stat-footer">
+        <i class="bi bi-clock"></i>
+        <span>Actualizado hace 10 min</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Acciones Rápidas (Solo Administradores) -->
+{% if user and user.get('user_level',0) >= 4 %}
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h5 class="chart-title">
+          <i class="bi bi-lightning-charge-fill text-warning"></i>
+          Acciones Rápidas - Administrador
+        </h5>
+      </div>
+      <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-3">
+          <a href="{{ url_for('registro_completo') }}" class="quick-action-card">
+            <div class="quick-action-icon bg-gradient-sena text-white">
+              <i class="bi bi-plus-circle-fill"></i>
+            </div>
+            <h6 class="fw-bold mb-2">Registrar Equipo/Item</h6>
+            <p class="text-small text-muted mb-0">Registro completo con IA</p>
+          </a>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3">
+          <a href="{{ url_for('usuarios') }}" class="quick-action-card">
+            <div class="quick-action-icon bg-gradient-cyan text-white">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <h6 class="fw-bold mb-2">Gestionar Usuarios</h6>
+            <p class="text-small text-muted mb-0">Crear y editar usuarios</p>
+          </a>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3">
+          <a href="{{ url_for('backup') }}" class="quick-action-card">
+            <div class="quick-action-icon bg-gradient-warning text-white">
+              <i class="bi bi-database"></i>
+            </div>
+            <h6 class="fw-bold mb-2">Backup BD</h6>
+            <p class="text-small text-muted mb-0">Respaldar base de datos</p>
+          </a>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3">
+          <a href="{{ url_for('configuracion') }}" class="quick-action-card">
+            <div class="quick-action-icon bg-gradient-error text-white">
+              <i class="bi bi-gear-fill"></i>
+            </div>
+            <h6 class="fw-bold mb-2">Configuración</h6>
+            <p class="text-small text-muted mb-0">Ajustes del sistema</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Gráficos y Actividad -->
+<div class="row g-4 mb-4">
+  <div class="col-12 col-lg-8">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h5 class="chart-title">
+          <i class="bi bi-graph-up-arrow text-sena"></i>
+          Uso de Equipos
+        </h5>
+        <div class="chart-filter">
+          <button class="chart-filter-btn active">7 días</button>
+          <button class="chart-filter-btn">30 días</button>
+          <button class="chart-filter-btn">3 meses</button>
+        </div>
+      </div>
+      <canvas id="chartUso" style="max-height: 320px;"></canvas>
+    </div>
+  </div>
+  
+  <div class="col-12 col-lg-4">
+    <div class="activity-card">
+      <div class="chart-header">
+        <h5 class="chart-title">
+          <i class="bi bi-activity text-accent-cyan"></i>
+          Actividad Reciente
+        </h5>
+      </div>
+      <div id="actividadReciente" style="max-height: 320px; overflow-y: auto;">
+        <div class="activity-item">
+          <div class="activity-icon success">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Equipo reservado</div>
+            <div class="activity-meta">Microscopio Digital - Hace 5 min</div>
+          </div>
+        </div>
+        
+        <div class="activity-item">
+          <div class="activity-icon info">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Nuevo usuario registrado</div>
+            <div class="activity-meta">Juan Pérez - Hace 15 min</div>
+          </div>
+        </div>
+        
+        <div class="activity-item">
+          <div class="activity-icon warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Stock bajo</div>
+            <div class="activity-meta">Guantes de seguridad - Hace 1 hora</div>
+          </div>
+        </div>
+        
+        <div class="activity-item">
+          <div class="activity-icon success">
+            <i class="bi bi-box-arrow-in-right"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Entrada de inventario</div>
+            <div class="activity-meta">50 unidades - Hace 2 horas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Acceso Directo a Módulos -->
+<div class="row g-4">
+  <div class="col-12">
+    <h4 class="mb-3 fw-bold">
+      <i class="bi bi-grid-3x3-gap-fill me-2 text-sena"></i>
+      Acceso Rápido a Módulos
+    </h4>
+  </div>
+  
+  <div class="col-12 col-md-6 col-lg-4">
+    <a href="{{ url_for('equipos') }}" class="module-card">
+      <div class="module-icon bg-gradient-sena text-white">
+        <i class="bi bi-cpu"></i>
+      </div>
+      <h5 class="module-title">Equipos</h5>
+      <p class="module-description">Gestiona y controla todos los equipos del laboratorio</p>
+    </a>
+  </div>
+  
+  <div class="col-12 col-md-6 col-lg-4">
+    <a href="{{ url_for('inventario') }}" class="module-card">
+      <div class="module-icon bg-gradient-cyan text-white">
+        <i class="bi bi-box-seam"></i>
+      </div>
+      <h5 class="module-title">Inventario</h5>
+      <p class="module-description">Control de stock y materiales disponibles</p>
+    </a>
+  </div>
+  
+  <div class="col-12 col-md-6 col-lg-4">
+    <a href="{{ url_for('reservas') }}" class="module-card">
+      <div class="module-icon bg-gradient-info text-white">
+        <i class="bi bi-calendar-event"></i>
+      </div>
+      <h5 class="module-title">Reservas</h5>
+      <p class="module-description">Programa y administra reservas de equipos</p>
+    </a>
+  </div>
+  
+  <div class="col-12 col-md-6 col-lg-4">
+    <a href="{{ url_for('reportes') }}" class="module-card">
+      <div class="module-icon bg-gradient-warning text-white">
+        <i class="bi bi-graph-up"></i>
+      </div>
+      <h5 class="module-title">Reportes</h5>
+      <p class="module-description">Análisis y estadísticas del sistema</p>
+    </a>
+  </div>
+  
+  <div class="col-12 col-md-6 col-lg-4">
+    <a href="{{ url_for('registro_facial') }}" class="module-card">
+      <div class="module-icon bg-gradient-success text-white">
+        <i class="bi bi-person-badge"></i>
+      </div>
+      <h5 class="module-title">Registro Facial</h5>
+      <p class="module-description">Configura tu acceso por reconocimiento facial</p>
+    </a>
+  </div>
+  
+  <div class="col-12 col-md-6 col-lg-4">
+    <a href="{{ url_for('entrenamiento_visual') }}" class="module-card">
+      <div class="module-icon bg-gradient-sena-light text-white">
+        <i class="bi bi-robot"></i>
+      </div>
+      <h5 class="module-title">IA Visual</h5>
+      <p class="module-description">Entrenamiento de reconocimiento de objetos</p>
+    </a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  // Gráfico de uso de equipos con diseño profesional
+  const ctx = document.getElementById('chartUso');
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+      datasets: [{
+        label: 'Usos de Equipos',
+        data: [42, 58, 45, 62, 51, 28, 19],
+        backgroundColor: 'rgba(4, 120, 87, 0.85)',
+        borderColor: 'rgba(6, 95, 70, 1)',
+        borderWidth: 2,
+        borderRadius: 12,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          padding: 12,
+          borderRadius: 8,
+          titleFont: {
+            size: 14,
+            weight: 'bold'
+          },
+          bodyFont: {
+            size: 13
+          },
+          callbacks: {
+            label: function(context) {
+              return 'Usos: ' + context.parsed.y;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)',
+            drawBorder: false
+          },
+          ticks: {
+            font: {
+              size: 12,
+              weight: '500'
+            },
+            color: '#737373'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            font: {
+              size: 12,
+              weight: '600'
+            },
+            color: '#404040'
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

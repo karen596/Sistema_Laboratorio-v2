@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% set title = 'Configuración' %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header fw-semibold"><i class="bi bi-gear me-2"></i>Parámetros del sistema</div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead class="table-light"><tr><th>Clave</th><th>Valor</th><th>Descripción</th></tr></thead>
+        <tbody>
+          {% for c in configuraciones %}
+          <tr>
+            <td class="fw-semibold">{{ c.clave }}</td>
+            <td><code>{{ c.valor }}</code></td>
+            <td class="text-muted">{{ c.descripcion }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

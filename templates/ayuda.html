@@ -1,0 +1,1111 @@
+{% extends 'base.html' %}
+{% set title = 'Ayuda - Manual de Usuario' %}
+{% block content %}
+<style>
+    .help-header {
+        background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .help-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .help-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    .help-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f3ff;
+        color: #1e5128;
+    }
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<div class="help-header">
+    <i class="bi bi-question-circle" style="font-size: 3em; margin-bottom: 15px;"></i>
+    <h1>Centro de Ayuda</h1>
+    <p class="mb-0">Manual de Usuario - Sistema de Gestión de Laboratorios</p>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="help-section text-center">
+            <div class="help-icon mx-auto">
+                <i class="bi bi-play-circle"></i>
+            </div>
+            <h4>Primeros Pasos</h4>
+            <p class="text-muted">Aprende a usar el sistema desde cero</p>
+            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalPrimerosPasos">
+                Ver Tutorial
+            </button>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="help-section text-center">
+            <div class="help-icon mx-auto">
+                <i class="bi bi-book"></i>
+            </div>
+            <h4>Guías Rápidas</h4>
+            <p class="text-muted">Consulta guías paso a paso</p>
+            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalGuias">
+                Ver Guías
+            </button>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="help-section text-center">
+            <div class="help-icon mx-auto">
+                <i class="bi bi-chat-dots"></i>
+            </div>
+            <h4>Preguntas Frecuentes</h4>
+            <p class="text-muted">Encuentra respuestas rápidas</p>
+            <a href="#faq" class="btn btn-outline-success">
+                Ver FAQs
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="help-section" id="faq">
+    <h3 class="mb-4"><i class="bi bi-patch-question me-2"></i>Preguntas Frecuentes</h3>
+    
+    <div class="accordion" id="accordionFAQ">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    ¿Cómo inicio sesión en el sistema?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                    <p>Para iniciar sesión:</p>
+                    <ol>
+                        <li>Ingresa a la página principal del sistema</li>
+                        <li>Introduce tu ID de usuario (Ej: INST001)</li>
+                        <li>Haz clic en "Ingresar" o presiona Enter</li>
+                        <li>Si tienes reconocimiento facial habilitado, permite el acceso a la cámara</li>
+                    </ol>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Nota:</strong> Si olvidaste tu contraseña, usa la opción "Recuperar Contraseña"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                    ¿Cómo reservo un equipo?
+                </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                    <p>Para reservar un equipo:</p>
+                    <ol>
+                        <li>Ve al módulo de "Equipos" desde el menú lateral</li>
+                        <li>Busca el equipo que necesitas</li>
+                        <li>Haz clic en "Reservar"</li>
+                        <li>Selecciona la fecha y hora de inicio y fin</li>
+                        <li>Confirma la reserva</li>
+                    </ol>
+                    <p>Puedes ver tus reservas activas en el módulo "Reservas".</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                    ¿Cómo uso los comandos de voz?
+                </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                    <p>Para usar comandos de voz:</p>
+                    <ol>
+                        <li>Haz clic en el ícono del micrófono en la barra superior</li>
+                        <li>Permite el acceso al micrófono cuando se solicite</li>
+                        <li>Di tu comando claramente (Ej: "Mostrar equipos disponibles")</li>
+                        <li>El sistema procesará y ejecutará tu comando</li>
+                    </ol>
+                    <div class="alert alert-success">
+                        <strong>Comandos disponibles:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>"Mostrar equipos"</li>
+                            <li>"Ver inventario"</li>
+                            <li>"Mis reservas"</li>
+                            <li>"Estado del laboratorio"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                    ¿Cómo activo las opciones de accesibilidad?
+                </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                    <p>Para configurar la accesibilidad:</p>
+                    <ol>
+                        <li>Haz clic en el ícono ♿ en la barra superior</li>
+                        <li>Activa las opciones que necesites:
+                            <ul>
+                                <li>Alto Contraste</li>
+                                <li>Tamaño de Texto (ajustable)</li>
+                                <li>Modo Oscuro</li>
+                                <li>Reducir Animaciones</li>
+                            </ul>
+                        </li>
+                        <li>Haz clic en "Guardar Configuración"</li>
+                    </ol>
+                    <p>Tus preferencias se guardarán automáticamente.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                    ¿Qué hago si encuentro un error?
+                </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                <div class="accordion-body">
+                    <p>Si encuentras un error:</p>
+                    <ol>
+                        <li>Anota el mensaje de error que aparece</li>
+                        <li>Toma una captura de pantalla si es posible</li>
+                        <li>Contacta al administrador del sistema</li>
+                        <li>Proporciona la siguiente información:
+                            <ul>
+                                <li>Tu ID de usuario</li>
+                                <li>Fecha y hora del error</li>
+                                <li>Qué estabas haciendo cuando ocurrió</li>
+                                <li>Captura de pantalla</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="help-section">
+    <h3 class="mb-4"><i class="bi bi-keyboard me-2"></i>Atajos de Teclado</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Atajo</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><kbd>Tab</kbd></td>
+                        <td>Navegar entre elementos</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>Enter</kbd></td>
+                        <td>Activar elemento seleccionado</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>Esc</kbd></td>
+                        <td>Cerrar modal/diálogo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Atajo</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><kbd>Alt</kbd> + <kbd>L</kbd></td>
+                        <td>Cerrar sesión</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>Ctrl</kbd> + <kbd>F</kbd></td>
+                        <td>Buscar en página</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>F5</kbd></td>
+                        <td>Recargar página</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Primeros Pasos -->
+<div class="modal fade" id="modalPrimerosPasos" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-play-circle me-2"></i>Tutorial: Primeros Pasos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Bienvenido al Sistema de Gestión de Laboratorios</h6>
+                <p>Este tutorial te guiará en tus primeros pasos:</p>
+                
+                <div class="accordion" id="tutorialAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#paso1">
+                                Paso 1: Conoce el Dashboard
+                            </button>
+                        </h2>
+                        <div id="paso1" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                El dashboard es tu página principal. Aquí verás:
+                                <ul>
+                                    <li>Estadísticas en tiempo real</li>
+                                    <li>Equipos activos</li>
+                                    <li>Inventario crítico</li>
+                                    <li>Tus reservas activas</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paso2">
+                                Paso 2: Navega por los Módulos
+                            </button>
+                        </h2>
+                        <div id="paso2" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                Usa el menú lateral para acceder a:
+                                <ul>
+                                    <li><strong>Laboratorios:</strong> Gestiona espacios físicos</li>
+                                    <li><strong>Equipos:</strong> Consulta y reserva equipos</li>
+                                    <li><strong>Inventario:</strong> Revisa materiales disponibles</li>
+                                    <li><strong>Reservas:</strong> Administra tus reservas</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Guías -->
+<div class="modal fade" id="modalGuias" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-book me-2"></i>Guías Rápidas del Sistema</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Navegación de Guías -->
+                <ul class="nav nav-tabs mb-4" id="guiasTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="guia-usuario-tab" data-bs-toggle="tab" data-bs-target="#guia-usuario-content" type="button">
+                            <i class="bi bi-book me-1"></i>Guía del Usuario
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="guia-reservas-tab" data-bs-toggle="tab" data-bs-target="#guia-reservas-content" type="button">
+                            <i class="bi bi-calendar-check me-1"></i>Manual de Reservas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="guia-accesibilidad-tab" data-bs-toggle="tab" data-bs-target="#guia-accesibilidad-content" type="button">
+                            <i class="bi bi-universal-access me-1"></i>Accesibilidad
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Contenido de las Guías -->
+                <div class="tab-content" id="guiasTabContent">
+                    <!-- Guía del Usuario -->
+                    <div class="tab-pane fade show active" id="guia-usuario-content">
+                        <h4 class="mb-3">📖 Guía Completa del Usuario</h4>
+                        
+                        <div class="accordion" id="guiaUsuarioAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#intro">
+                                        1. Introducción al Sistema
+                                    </button>
+                                </h2>
+                                <div id="intro" class="accordion-collapse collapse show">
+                                    <div class="accordion-body">
+                                        <p><strong>Bienvenido al Sistema de Gestión de Laboratorios</strong></p>
+                                        <p>Este sistema te permite:</p>
+                                        <ul>
+                                            <li>✅ Consultar equipos y materiales disponibles</li>
+                                            <li>✅ Reservar equipos para tus prácticas</li>
+                                            <li>✅ Gestionar tu perfil de usuario</li>
+                                            <li>✅ Acceder a reportes y estadísticas</li>
+                                            <li>✅ Usar comandos de voz para operaciones rápidas</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navegacion">
+                                        2. Navegación por el Sistema
+                                    </button>
+                                </h2>
+                                <div id="navegacion" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <p><strong>Menú Lateral:</strong></p>
+                                        <ul>
+                                            <li><strong>Dashboard:</strong> Vista general con estadísticas en tiempo real</li>
+                                            <li><strong>Laboratorios:</strong> Consulta de espacios y su capacidad</li>
+                                            <li><strong>Equipos:</strong> Catálogo completo de equipos disponibles</li>
+                                            <li><strong>Inventario:</strong> Materiales, reactivos y consumibles</li>
+                                            <li><strong>Reservas:</strong> Gestión de tus reservas activas</li>
+                                            <li><strong>Usuarios:</strong> Administración de usuarios (solo coordinadores)</li>
+                                            <li><strong>Reportes:</strong> Generación de reportes (instructores y superiores)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#perfil">
+                                        3. Gestión de Perfil
+                                    </button>
+                                </h2>
+                                <div id="perfil" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <p>Puedes actualizar tu información personal desde <strong>Mi Perfil</strong>:</p>
+                                        <ol>
+                                            <li>Haz clic en "Mi Perfil" en el menú lateral</li>
+                                            <li>Edita tu nombre, correo, teléfono o programa</li>
+                                            <li>Haz clic en "Guardar Cambios"</li>
+                                        </ol>
+                                        <p class="mb-0"><strong>Nota:</strong> Tu ID de usuario y nivel de acceso no pueden ser modificados.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manual de Reservas -->
+                    <div class="tab-pane fade" id="guia-reservas-content">
+                        <h4 class="mb-3">📅 Manual de Reservas</h4>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <strong>Cómo Reservar un Equipo</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <ol>
+                                            <li>Accede al módulo <strong>Equipos</strong></li>
+                                            <li>Busca el equipo que necesitas</li>
+                                            <li>Verifica su disponibilidad</li>
+                                            <li>Haz clic en <strong>"Reservar"</strong></li>
+                                            <li>Selecciona fecha y hora de inicio</li>
+                                            <li>Selecciona fecha y hora de fin</li>
+                                            <li>Confirma la reserva</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <strong>Estados de Reserva</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li class="mb-2"><span class="badge bg-warning text-dark">Programada</span> Reserva confirmada y pendiente</li>
+                                            <li class="mb-2"><span class="badge bg-success">Activa</span> En uso actualmente</li>
+                                            <li class="mb-2"><span class="badge bg-info">Completada</span> Finalizada correctamente</li>
+                                            <li class="mb-2"><span class="badge bg-danger">Cancelada</span> Anulada por el usuario</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Importante:</strong> Cancela tus reservas con al menos 2 horas de anticipación para permitir que otros usuarios puedan usar el equipo.
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Tip:</strong> Puedes ver todas tus reservas activas en el módulo "Reservas" del menú lateral.
+                        </div>
+                    </div>
+
+                    <!-- Guía de Accesibilidad -->
+                    <div class="tab-pane fade" id="guia-accesibilidad-content">
+                        <h4 class="mb-3">♿ Guía de Accesibilidad</h4>
+                        
+                        <p class="lead">El sistema incluye múltiples opciones de accesibilidad para garantizar que todos los usuarios puedan utilizarlo cómodamente.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-eye text-success me-2"></i>Alto Contraste</h5>
+                                        <p class="card-text">Aumenta el contraste visual entre texto y fondo para personas con baja visión.</p>
+                                        <p class="small text-muted mb-0"><strong>Cómo activar:</strong> Haz clic en el botón ♿ en la barra superior y activa el switch "Alto Contraste"</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-fonts text-primary me-2"></i>Tamaño de Texto Ajustable</h5>
+                                        <p class="card-text">Ajusta el tamaño del texto desde 80% hasta 200% según tu preferencia.</p>
+                                        <p class="small text-muted mb-0"><strong>Cómo usar:</strong> Usa el control deslizante en las opciones de accesibilidad</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-moon-stars text-dark me-2"></i>Modo Oscuro</h5>
+                                        <p class="card-text">Reduce el brillo de la pantalla con una paleta de colores oscuros.</p>
+                                        <p class="small text-muted mb-0"><strong>Ideal para:</strong> Uso nocturno o personas con sensibilidad a la luz</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="bi bi-keyboard text-warning me-2"></i>Navegación por Teclado</h5>
+                                        <p class="card-text">Navega completamente sin mouse usando Tab, Enter y las flechas.</p>
+                                        <p class="small text-muted mb-0"><strong>Compatible con:</strong> Lectores de pantalla NVDA y JAWS</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mt-3">
+                            <div class="card-body">
+                                <h6><i class="bi bi-keyboard me-2"></i>Atajos de Teclado Principales</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li><kbd>Tab</kbd> - Navegar entre elementos</li>
+                                            <li><kbd>Enter</kbd> - Activar elemento</li>
+                                            <li><kbd>Esc</kbd> - Cerrar modal</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled">
+                                            <li><kbd>Alt</kbd> + <kbd>L</kbd> - Cerrar sesión</li>
+                                            <li><kbd>Ctrl</kbd> + <kbd>F</kbd> - Buscar</li>
+                                            <li><kbd>F5</kbd> - Recargar página</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <small class="text-muted me-auto">
+                    <i class="bi bi-download me-1"></i>Usa Ctrl+P para imprimir o guardar como PDF
+                </small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección: Guía Completa del Usuario -->
+<div class="help-section" id="guia-usuario">
+    <h3 class="mb-4"><i class="bi bi-book me-2"></i>Guía Completa del Usuario</h3>
+    
+    <div class="accordion" id="guiaUsuarioAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#guia1">
+                    1. Introducción al Sistema
+                </button>
+            </h2>
+            <div id="guia1" class="accordion-collapse collapse show" data-bs-parent="#guiaUsuarioAccordion">
+                <div class="accordion-body">
+                    <p><strong>Bienvenido al Sistema de Gestión de Laboratorios</strong></p>
+                    <p>Este sistema te permite:</p>
+                    <ul>
+                        <li>Consultar equipos y materiales disponibles</li>
+                        <li>Reservar equipos para tus prácticas</li>
+                        <li>Gestionar tu perfil de usuario</li>
+                        <li>Acceder a reportes y estadísticas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guia2">
+                    2. Navegación por el Sistema
+                </button>
+            </h2>
+            <div id="guia2" class="accordion-collapse collapse" data-bs-parent="#guiaUsuarioAccordion">
+                <div class="accordion-body">
+                    <p><strong>Menú Lateral:</strong></p>
+                    <ul>
+                        <li><strong>Dashboard:</strong> Vista general del sistema</li>
+                        <li><strong>Laboratorios:</strong> Consulta de espacios disponibles</li>
+                        <li><strong>Equipos:</strong> Catálogo de equipos</li>
+                        <li><strong>Inventario:</strong> Materiales y reactivos</li>
+                        <li><strong>Reservas:</strong> Gestión de reservas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección: Manual de Reservas -->
+<div class="help-section" id="guia-reservas">
+    <h3 class="mb-4"><i class="bi bi-calendar-check me-2"></i>Manual de Reservas</h3>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Cómo Reservar un Equipo</h5>
+            <ol>
+                <li>Accede al módulo <strong>Equipos</strong></li>
+                <li>Busca el equipo que necesitas</li>
+                <li>Verifica su disponibilidad</li>
+                <li>Haz clic en <strong>"Reservar"</strong></li>
+                <li>Selecciona fecha y hora</li>
+                <li>Confirma la reserva</li>
+            </ol>
+        </div>
+        <div class="col-md-6">
+            <h5>Estados de Reserva</h5>
+            <ul>
+                <li><span class="badge bg-warning">Programada</span> - Reserva confirmada</li>
+                <li><span class="badge bg-success">Activa</span> - En uso actualmente</li>
+                <li><span class="badge bg-info">Completada</span> - Finalizada</li>
+                <li><span class="badge bg-danger">Cancelada</span> - Anulada</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="alert alert-warning mt-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Importante:</strong> Cancela tus reservas con al menos 2 horas de anticipación.
+    </div>
+</div>
+
+<!-- Sección: Guía de Accesibilidad -->
+<div class="help-section" id="guia-accesibilidad">
+    <h3 class="mb-4"><i class="bi bi-universal-access me-2"></i>Guía de Accesibilidad</h3>
+    
+    <p>El sistema incluye múltiples opciones de accesibilidad para garantizar que todos los usuarios puedan utilizarlo cómodamente.</p>
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-eye me-2"></i>Alto Contraste</h5>
+                    <p class="card-text">Aumenta el contraste visual para personas con baja visión.</p>
+                    <p class="small text-muted">Actívalo desde el botón ♿ en la barra superior</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-fonts me-2"></i>Tamaño de Texto</h5>
+                    <p class="card-text">Ajusta el tamaño del texto de 80% a 200%.</p>
+                    <p class="small text-muted">Usa el control deslizante en opciones de accesibilidad</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-moon-stars me-2"></i>Modo Oscuro</h5>
+                    <p class="card-text">Reduce el brillo de la pantalla con colores oscuros.</p>
+                    <p class="small text-muted">Ideal para uso nocturno o sensibilidad a la luz</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-keyboard me-2"></i>Navegación por Teclado</h5>
+                    <p class="card-text">Navega sin mouse usando Tab, Enter y flechas.</p>
+                    <p class="small text-muted">Compatible con lectores de pantalla</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección: Manual Completo del Usuario -->
+<div class="help-section" id="manual-usuario">
+    <h3 class="mb-4"><i class="bi bi-file-earmark-text me-2"></i>Manual Completo del Usuario</h3>
+    
+    <div class="alert alert-success">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Centro Minero SENA - Regional Boyacá</strong><br>
+        Sistema de Gestión de Laboratorios v1.0
+    </div>
+
+    <div class="accordion" id="manualUsuarioAccordion">
+        <!-- Sección 1: Roles y Permisos -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#manual1">
+                    1. Roles y Niveles de Acceso
+                </button>
+            </h2>
+            <div id="manual1" class="accordion-collapse collapse show" data-bs-parent="#manualUsuarioAccordion">
+                <div class="accordion-body">
+                    <h5>👥 Tipos de Usuario</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <strong>👨‍🎓 Aprendiz (Nivel 1)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Permisos:</strong></p>
+                                    <ul class="small">
+                                        <li>✅ Ver dashboard personal</li>
+                                        <li>✅ Ver equipos disponibles</li>
+                                        <li>✅ Crear reservas</li>
+                                        <li>✅ Registrar su rostro</li>
+                                        <li>✅ Registrar datos básicos</li>
+                                    </ul>
+                                    <p class="small text-danger mb-0"><strong>Restricciones:</strong> No puede editar ni eliminar equipos</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <strong>👨‍🏫 Instructor (Nivel 2)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Permisos adicionales:</strong></p>
+                                    <ul class="small">
+                                        <li>✅ Todos los de Aprendiz</li>
+                                        <li>✅ Ver reportes de uso</li>
+                                        <li>✅ Ver estadísticas</li>
+                                        <li>✅ Observar actividad</li>
+                                    </ul>
+                                    <p class="small text-danger mb-0"><strong>Restricciones:</strong> Solo observador, no puede editar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning">
+                                    <strong>👨‍💼 Coordinador (Nivel 3)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Permisos adicionales:</strong></p>
+                                    <ul class="small">
+                                        <li>✅ Todos los de Instructor</li>
+                                        <li>✅ Gestionar usuarios</li>
+                                        <li>✅ Editar equipos</li>
+                                        <li>✅ Aprobar reservas</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <strong>👨‍💻 Administrador (Nivel 4)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Acceso Total:</strong></p>
+                                    <ul class="small">
+                                        <li>✅ Todos los permisos</li>
+                                        <li>✅ Configuración del sistema</li>
+                                        <li>✅ Backups de base de datos</li>
+                                        <li>✅ Gestión completa</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 2: Módulos del Sistema -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manual2">
+                    2. Módulos del Sistema
+                </button>
+            </h2>
+            <div id="manual2" class="accordion-collapse collapse" data-bs-parent="#manualUsuarioAccordion">
+                <div class="accordion-body">
+                    <h5>📊 Dashboard</h5>
+                    <p>Vista general con estadísticas en tiempo real:</p>
+                    <ul>
+                        <li>Total de usuarios activos</li>
+                        <li>Equipos disponibles y en uso</li>
+                        <li>Inventario crítico (stock bajo)</li>
+                        <li>Reservas activas del día</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h5>🔬 Laboratorios</h5>
+                    <p>Gestión de espacios físicos:</p>
+                    <ul>
+                        <li>Consulta de laboratorios disponibles</li>
+                        <li>Capacidad y ubicación</li>
+                        <li>Estado operativo</li>
+                        <li>Responsable asignado</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h5>💻 Equipos</h5>
+                    <p>Catálogo completo de equipos:</p>
+                    <ul>
+                        <li>Búsqueda por nombre o tipo</li>
+                        <li>Filtrado por estado</li>
+                        <li>Especificaciones técnicas</li>
+                        <li>Reserva de equipos</li>
+                        <li><strong>Administrador:</strong> Crear, editar, eliminar equipos</li>
+                        <li><strong>Aprendiz/Instructor:</strong> Solo visualización y registro</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h5>📦 Inventario</h5>
+                    <p>Materiales y consumibles:</p>
+                    <ul>
+                        <li>Consulta de stock disponible</li>
+                        <li>Alertas de stock mínimo</li>
+                        <li>Categorías de materiales</li>
+                        <li>Ubicación en almacén</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h5>📅 Reservas</h5>
+                    <p>Gestión de reservas de equipos:</p>
+                    <ul>
+                        <li>Ver tus reservas activas</li>
+                        <li>Crear nuevas reservas</li>
+                        <li>Cancelar reservas</li>
+                        <li>Historial de reservas</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h5>🤖 IA Visual</h5>
+                    <p>Reconocimiento visual de objetos:</p>
+                    <ul>
+                        <li>Entrenar el sistema con imágenes</li>
+                        <li>Reconocer objetos en tiempo real</li>
+                        <li>Gestionar categorías</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 3: Funciones Avanzadas -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manual3">
+                    3. Funciones Avanzadas
+                </button>
+            </h2>
+            <div id="manual3" class="accordion-collapse collapse" data-bs-parent="#manualUsuarioAccordion">
+                <div class="accordion-body">
+                    <h5>🔐 Registro Facial</h5>
+                    <p><strong>Cómo registrar tu rostro:</strong></p>
+                    <ol>
+                        <li>Ve al módulo "Registro Facial"</li>
+                        <li>Haz clic en "Iniciar Cámara"</li>
+                        <li>Permite el acceso a la cámara</li>
+                        <li>Posiciona tu rostro en el centro</li>
+                        <li>Haz clic en "Capturar Rostro"</li>
+                        <li>Verifica la imagen capturada</li>
+                        <li>Haz clic en "Registrar"</li>
+                    </ol>
+                    <div class="alert alert-info">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        <strong>Consejos:</strong>
+                        <ul class="mb-0">
+                            <li>Asegúrate de tener buena iluminación</li>
+                            <li>Mira directamente a la cámara</li>
+                            <li>Evita usar gafas oscuras o gorras</li>
+                        </ul>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>🎤 Comandos de Voz</h5>
+                    <p><strong>Comandos disponibles:</strong></p>
+                    <ul>
+                        <li>"Mostrar equipos" - Muestra el catálogo de equipos</li>
+                        <li>"Ver inventario" - Abre el módulo de inventario</li>
+                        <li>"Mis reservas" - Muestra tus reservas activas</li>
+                        <li>"Estado del laboratorio" - Información general</li>
+                        <li>"Ir al dashboard" - Vuelve a la página principal</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h5>🔑 Autenticación JWT (API)</h5>
+                    <p>Para usar funciones de API:</p>
+                    <ol>
+                        <li>Haz clic en el botón 🔑 en la barra superior</li>
+                        <li>Ingresa tu ID de usuario</li>
+                        <li>Haz clic en "Iniciar"</li>
+                        <li>El token se guardará automáticamente</li>
+                    </ol>
+                    <p class="small text-muted">El token JWT permite crear y editar equipos desde la interfaz web.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 4: Recuperación de Contraseña -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manual4">
+                    4. Recuperación de Contraseña
+                </button>
+            </h2>
+            <div id="manual4" class="accordion-collapse collapse" data-bs-parent="#manualUsuarioAccordion">
+                <div class="accordion-body">
+                    <h5>🔓 ¿Olvidaste tu contraseña?</h5>
+                    <p><strong>Proceso de recuperación:</strong></p>
+                    <ol>
+                        <li>En la página de login, haz clic en "Recuperar Contraseña"</li>
+                        <li>Ingresa tu ID de usuario</li>
+                        <li>Recibirás un código de 6 dígitos por correo electrónico</li>
+                        <li>Ingresa el código en la página de verificación</li>
+                        <li>Establece tu nueva contraseña</li>
+                        <li>Confirma la nueva contraseña</li>
+                    </ol>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-clock me-2"></i>
+                        <strong>Importante:</strong> El código de recuperación expira en 15 minutos.
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-shield-check me-2"></i>
+                        <strong>Seguridad:</strong> Si no solicitaste el código, ignora el correo y contacta al administrador.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 5: Solución de Problemas -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manual5">
+                    5. Solución de Problemas Comunes
+                </button>
+            </h2>
+            <div id="manual5" class="accordion-collapse collapse" data-bs-parent="#manualUsuarioAccordion">
+                <div class="accordion-body">
+                    <h5>⚠️ Problemas Frecuentes</h5>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <strong>Problema:</strong> No puedo crear o editar equipos
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Solución:</strong></p>
+                            <ol>
+                                <li>Verifica que tengas permisos de Administrador (Nivel 4)</li>
+                                <li>Inicia sesión con el token JWT (botón 🔑)</li>
+                                <li>Si el error persiste, cierra sesión y vuelve a entrar</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <strong>Problema:</strong> La cámara no funciona
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Solución:</strong></p>
+                            <ol>
+                                <li>Verifica que tu navegador tenga permisos para acceder a la cámara</li>
+                                <li>Cierra otras aplicaciones que puedan estar usando la cámara</li>
+                                <li>Prueba con otro navegador (Chrome o Edge recomendados)</li>
+                                <li>Verifica que tu cámara esté conectada correctamente</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <strong>Problema:</strong> No recibo el código de recuperación
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Solución:</strong></p>
+                            <ol>
+                                <li>Verifica tu carpeta de spam/correo no deseado</li>
+                                <li>Asegúrate de haber ingresado tu ID correctamente</li>
+                                <li>Espera unos minutos, el correo puede tardar</li>
+                                <li>Si no llega, contacta al administrador</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <strong>Problema:</strong> El sistema está lento
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Solución:</strong></p>
+                            <ol>
+                                <li>Limpia la caché de tu navegador</li>
+                                <li>Cierra pestañas innecesarias</li>
+                                <li>Verifica tu conexión a internet</li>
+                                <li>Recarga la página (F5)</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección 6: Contacto y Soporte -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manual6">
+                    6. Contacto y Soporte Técnico
+                </button>
+            </h2>
+            <div id="manual6" class="accordion-collapse collapse" data-bs-parent="#manualUsuarioAccordion">
+                <div class="accordion-body">
+                    <h5>📞 Información de Contacto</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="bi bi-building me-2"></i>Centro Minero SENA</h6>
+                                    <p class="card-text">
+                                        <strong>Regional:</strong> Boyacá<br>
+                                        <strong>Ubicación:</strong> Sogamoso, Boyacá<br>
+                                        <strong>Teléfono:</strong> (604) 444 0400
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-primary h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="bi bi-headset me-2"></i>Soporte Técnico</h6>
+                                    <p class="card-text">
+                                        <strong>Email:</strong> <a href="mailto:gilcentrominero@gmail.com">gilcentrominero@gmail.com</a><br>
+                                        <strong>Horario:</strong> Lunes a Viernes<br>
+                                        7:00 AM - 5:00 PM
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-envelope me-2"></i>
+                        <strong>Para reportar un problema:</strong>
+                        <ol class="mb-0 mt-2">
+                            <li>Envía un correo a gilcentrominero@gmail.com</li>
+                            <li>Incluye tu ID de usuario</li>
+                            <li>Describe el problema detalladamente</li>
+                            <li>Adjunta capturas de pantalla si es posible</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón para imprimir manual -->
+<div class="text-center mt-4">
+    <button class="btn btn-lg btn-success" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i>Imprimir Manual Completo
+    </button>
+    <a href="#" class="btn btn-lg btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalContacto">
+        <i class="bi bi-envelope me-2"></i>Contactar Soporte
+    </a>
+</div>
+
+{% endblock %}

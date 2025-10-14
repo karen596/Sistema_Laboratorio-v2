@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% set title = 'Gestión de Registros (Visión)' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0"><i class="bi bi-collection me-2"></i>Registros</h5>
+  <a class="btn btn-outline-sena" href="{{ url_for('objetos_registrar') }}"><i class="bi bi-plus-lg me-1"></i>Nuevo</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row g-3 mb-2">
+      <div class="col-md-4">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input id="filtro" class="form-control" placeholder="Buscar por nombre o categoría">
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle" id="tablaObjs">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Miniatura</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Creado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar -->
+<div class="modal fade" id="modalEditObj" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Editar registro</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="mb-2"><label class="form-label">Nombre</label><input id="eNombre" class="form-control"></div>
+        <div class="mb-2"><label class="form-label">Categoría</label><input id="eCategoria" class="form-control"></div>
+        <div class="mb-2"><label class="form-label">Descripción</label><textarea id="eDescripcion" class="form-control" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button class="btn btn-sena" id="btnGuardarEdit">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function(){
+  function needAuth(){ if(!localStorage.getItem('jwt')){ ApiAuth.openLogin(); throw new Error('JWT requerido'); } }
+  async function api(url, opts={}){
+    const t = localStorage.getItem('jwt');
+    opts.headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{}, t? {'Authorization':'Bearer '+t}: {});
+    const res = await fetch(url, opts);
+    await ApiAuth.ensureAuthOrPrompt(res);
+    return res;
+  }
+
+  const tbody = document.querySelector('#tablaObjs tbody');
+  const filtro = document.getElementById('filtro');
+  let datos = [];
+  let editId = null;
+
+  async function cargar(q=''){
+    needAuth();
+    const res = await api('/api/objetos'+(q? `?q=${encodeURIComponent(q)}`:''));
+    const data = await res.json();
+    datos = data.objetos||[];
+    render();
+  }
+
+  function render(){
+    const t = (filtro.value||'').toLowerCase();
+    tbody.innerHTML = '';
+    datos.filter(o=> (o.nombre||'').toLowerCase().includes(t) || (o.categoria||'').toLowerCase().includes(t)).forEach(o=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-muted">${o.id}</td>
+        <td style="width:88px">
+          ${o.first_img_id? `<img src="/api/objetos/imagen_thumb/${o.first_img_id}" class="rounded border" style="width:72px;height:48px;object-fit:cover">` : '<span class="text-muted small">(sin imagen)</span>'}
+          <div class="small text-muted">${o.img_count||0} img</div>
+        </td>
+        <td class="fw-semibold">${o.nombre}</td>
+        <td>${o.categoria||''}</td>
+        <td class="text-truncate" style="max-width:280px">${o.descripcion||''}</td>
+        <td>${o.fecha_creacion||''}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-secondary btnEdit">Editar</button>
+            <button class="btn btn-outline-danger btnDel">Eliminar</button>
+          </div>
+        </td>
+      `;
+      tr.querySelector('.btnEdit').addEventListener('click', ()=>{
+        editId = o.id;
+        document.getElementById('eNombre').value = o.nombre||'';
+        document.getElementById('eCategoria').value = o.categoria||'';
+        document.getElementById('eDescripcion').value = o.descripcion||'';
+        new bootstrap.Modal(document.getElementById('modalEditObj')).show();
+      });
+      tr.querySelector('.btnDel').addEventListener('click', async ()=>{
+        needAuth();
+        if(!confirm(`¿Eliminar "${o.nombre}"? Se borrarán también sus imágenes.`)) return;
+        const res = await api(`/api/objetos/${o.id}`, {method:'DELETE'});
+        const data = await res.json();
+        if(res.ok){
+          datos = datos.filter(x=>x.id!==o.id); render();
+        } else {
+          alert(data?.message||'No se pudo eliminar');
+        }
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('btnGuardarEdit').addEventListener('click', async ()=>{
+    needAuth();
+    if(!editId) return;
+    const payload = {
+      nombre: document.getElementById('eNombre').value.trim(),
+      categoria: document.getElementById('eCategoria').value.trim(),
+      descripcion: document.getElementById('eDescripcion').value
+    };
+    const res = await api(`/api/objetos/${editId}`, {method:'PUT', body: JSON.stringify(payload)});
+    const data = await res.json().catch(()=>({}));
+    if(res.ok){
+      const idx = datos.findIndex(x=>x.id===editId);
+      if(idx>=0){ datos[idx] = Object.assign(datos[idx], payload); render(); }
+      bootstrap.Modal.getInstance(document.getElementById('modalEditObj')).hide();
+    } else {
+      alert(data?.message||'No se pudo actualizar');
+    }
+  });
+
+  filtro.addEventListener('input', render);
+  cargar();
+})();
+</script>
+{% endblock %}
