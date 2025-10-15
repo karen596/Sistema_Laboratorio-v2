@@ -311,23 +311,160 @@ function agregarItem() {
 }
 
 function verEquipo(equipoId) {
-    // Redirigir a detalle de equipo
-    window.location.href = `/equipos/${equipoId}`;
+    // Obtener y mostrar detalles del equipo
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+        alert('Debe iniciar sesión con JWT primero (icono de llave en la barra superior)');
+        return;
+    }
+    
+    fetch(`/api/equipos/${equipoId}`, {
+        headers: {'Authorization': 'Bearer ' + token}
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.equipo) {
+            const eq = data.equipo;
+            let detalles = `📋 DETALLES DEL EQUIPO\n\n`;
+            detalles += `ID: ${eq.id}\n`;
+            detalles += `Nombre: ${eq.nombre}\n`;
+            detalles += `Tipo: ${eq.tipo}\n`;
+            detalles += `Estado: ${eq.estado}\n`;
+            detalles += `Ubicación: ${eq.ubicacion || 'No especificada'}\n`;
+            if (eq.marca) detalles += `Marca: ${eq.marca}\n`;
+            if (eq.modelo) detalles += `Modelo: ${eq.modelo}\n`;
+            if (eq.numero_serie) detalles += `N° Serie: ${eq.numero_serie}\n`;
+            if (eq.observaciones) detalles += `\nObservaciones:\n${eq.observaciones}\n`;
+            
+            alert(detalles);
+        } else {
+            alert('No se pudieron obtener los detalles del equipo');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error obteniendo detalles: ' + err.message);
+    });
 }
 
 function verItem(itemId) {
-    // Implementar vista de detalle de item
-    alert(`Ver item ${itemId}`);
+    // Obtener y mostrar detalles del item
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+        alert('Debe iniciar sesión con JWT primero (icono de llave en la barra superior)');
+        return;
+    }
+    
+    fetch(`/api/inventario/${itemId}`, {
+        headers: {'Authorization': 'Bearer ' + token}
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.item) {
+            const item = data.item;
+            let detalles = `📦 DETALLES DEL ITEM\n\n`;
+            detalles += `ID: ${item.id}\n`;
+            detalles += `Nombre: ${item.nombre}\n`;
+            detalles += `Categoría: ${item.categoria || 'No especificada'}\n`;
+            detalles += `Cantidad Actual: ${item.cantidad_actual}\n`;
+            detalles += `Cantidad Mínima: ${item.cantidad_minima}\n`;
+            detalles += `Unidad: ${item.unidad || 'N/A'}\n`;
+            if (item.proveedor) detalles += `Proveedor: ${item.proveedor}\n`;
+            if (item.costo_unitario) detalles += `Costo Unitario: $${item.costo_unitario}\n`;
+            if (item.ubicacion) detalles += `Ubicación: ${item.ubicacion}\n`;
+            if (item.descripcion) detalles += `\nDescripción:\n${item.descripcion}\n`;
+            
+            alert(detalles);
+        } else {
+            alert('No se pudieron obtener los detalles del item');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error obteniendo detalles: ' + err.message);
+    });
 }
 
 function editarEquipo(equipoId) {
-    // Implementar edición de equipo
-    alert(`Editar equipo ${equipoId}`);
+    // Obtener datos del equipo
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+        alert('Debe iniciar sesión con JWT primero (icono de llave en la barra superior)');
+        return;
+    }
+    
+    fetch(`/api/equipos/${equipoId}`, {
+        headers: {'Authorization': 'Bearer ' + token}
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.equipo) {
+            const equipo = data.equipo;
+            const nuevoEstado = prompt(
+                `Editar estado del equipo: ${equipo.nombre}\n\nEstado actual: ${equipo.estado}\n\nOpciones: disponible, en_uso, mantenimiento, fuera_servicio`,
+                equipo.estado
+            );
+            
+            if (nuevoEstado && ['disponible', 'en_uso', 'mantenimiento', 'fuera_servicio'].includes(nuevoEstado)) {
+                fetch(`/api/equipos/${equipoId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({estado: nuevoEstado})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert('Equipo actualizado correctamente');
+                    location.reload();
+                })
+                .catch(err => alert('Error: ' + err.message));
+            }
+        }
+    })
+    .catch(err => alert('Error obteniendo datos: ' + err.message));
 }
 
 function editarItem(itemId) {
-    // Implementar edición de item
-    alert(`Editar item ${itemId}`);
+    // Obtener datos del item
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+        alert('Debe iniciar sesión con JWT primero (icono de llave en la barra superior)');
+        return;
+    }
+    
+    fetch(`/api/inventario/${itemId}`, {
+        headers: {'Authorization': 'Bearer ' + token}
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.item) {
+            const item = data.item;
+            const nuevaCantidad = prompt(
+                `Actualizar cantidad de: ${item.nombre}\n\nCantidad actual: ${item.cantidad_actual}\nCantidad mínima: ${item.cantidad_minima}\n\nIngrese nueva cantidad:`,
+                item.cantidad_actual
+            );
+            
+            if (nuevaCantidad !== null && !isNaN(nuevaCantidad)) {
+                fetch(`/api/inventario/${itemId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({cantidad_actual: parseInt(nuevaCantidad)})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert('Item actualizado correctamente');
+                    location.reload();
+                })
+                .catch(err => alert('Error: ' + err.message));
+            }
+        }
+    })
+    .catch(err => alert('Error obteniendo datos: ' + err.message));
 }
 
 function editarLaboratorio() {

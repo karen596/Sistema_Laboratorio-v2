@@ -1,23 +1,93 @@
 {% extends 'base.html' %}
-{% set title = 'Configuración' %}
+{% set title = 'Configuración del Sistema' %}
 {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2><i class="bi bi-gear-fill me-2"></i>Configuración del Sistema</h2>
+    <p class="text-muted mb-0">Parámetros y ajustes del sistema</p>
+  </div>
+  <div>
+    <span class="badge bg-success fs-6">
+      <i class="bi bi-check-circle me-1"></i>Sistema Activo
+    </span>
+  </div>
+</div>
+
+{% if configuraciones and configuraciones|length > 0 %}
+<!-- Buscador -->
+<div class="mb-3">
+  <div class="input-group" style="max-width: 400px;">
+    <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input type="text" id="filtroConfig" class="form-control" placeholder="Buscar configuración...">
+  </div>
+</div>
+
 <div class="card shadow-sm">
-  <div class="card-header fw-semibold"><i class="bi bi-gear me-2"></i>Parámetros del sistema</div>
-  <div class="card-body">
+  <div class="card-header bg-primary text-white">
+    <i class="bi bi-list-ul me-2"></i>Parámetros del Sistema ({{ configuraciones|length }})
+  </div>
+  <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-sm align-middle">
-        <thead class="table-light"><tr><th>Clave</th><th>Valor</th><th>Descripción</th></tr></thead>
+      <table class="table table-hover align-middle mb-0" id="tablaConfig">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 30%;">Parámetro</th>
+            <th style="width: 25%;">Valor</th>
+            <th style="width: 45%;">Descripción</th>
+          </tr>
+        </thead>
         <tbody>
           {% for c in configuraciones %}
-          <tr>
-            <td class="fw-semibold">{{ c.clave }}</td>
-            <td><code>{{ c.valor }}</code></td>
-            <td class="text-muted">{{ c.descripcion }}</td>
+          <tr data-clave="{{ c.clave|lower }}" data-desc="{{ c.descripcion|lower }}">
+            <td>
+              <strong class="text-primary">{{ c.clave }}</strong>
+            </td>
+            <td>
+              <code class="bg-light px-2 py-1 rounded">{{ c.valor }}</code>
+            </td>
+            <td class="text-muted">
+              <small>{{ c.descripcion }}</small>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
+  <div class="card-footer text-muted">
+    <small>
+      <i class="bi bi-info-circle me-1"></i>
+      Para modificar estos valores, contacte al administrador del sistema
+    </small>
+  </div>
 </div>
+
+<script>
+// Filtro de búsqueda
+const filtro = document.getElementById('filtroConfig');
+const tbody = document.querySelector('#tablaConfig tbody');
+
+filtro.addEventListener('input', () => {
+  const termino = filtro.value.toLowerCase();
+  
+  [...tbody.rows].forEach(row => {
+    const clave = row.dataset.clave || '';
+    const desc = row.dataset.desc || '';
+    const coincide = clave.includes(termino) || desc.includes(termino);
+    row.classList.toggle('d-none', !coincide);
+  });
+});
+</script>
+
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body text-center py-5">
+    <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+    <h4 class="mt-3">No hay configuraciones disponibles</h4>
+    <p class="text-muted">La tabla de configuración está vacía o no existe.</p>
+    <p class="text-muted">Ejecute el script <code>crear_tabla_configuracion.py</code> para inicializar las configuraciones.</p>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}

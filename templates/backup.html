@@ -145,13 +145,23 @@
                             </small>
                         </div>
                         <div class="col-auto">
-                            <button type="button" class="btn btn-sm btn-outline-success" 
+                            <a href="{{ url_for('download_backup', filename=backup.nombre) }}" 
+                               class="btn btn-sm btn-outline-primary"
+                               title="Descargar backup">
+                                <i class="bi bi-download me-1"></i>Descargar
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-success ms-2" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#modalRestore"
-                                    data-backup="{{ backup.nombre }}">
+                                    data-backup="{{ backup.nombre }}"
+                                    title="Restaurar backup">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Restaurar
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger ms-2">
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalDelete"
+                                    data-backup="{{ backup.nombre }}"
+                                    title="Eliminar backup">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -229,9 +239,42 @@
     </div>
 </div>
 
+<!-- Modal: Confirmar Eliminación -->
+<div class="modal fade" id="modalDelete" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-trash me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>¡ATENCIÓN!</strong> Esta acción no se puede deshacer.
+                </div>
+                <p>¿Estás seguro de que deseas eliminar este backup?</p>
+                <p class="mb-0"><strong>Archivo:</strong> <span id="deleteFileName"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('backup') }}" style="display: inline;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="backup_file" id="deleteFileInput">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Sí, Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Pasar nombre del backup al modal
+    // Pasar nombre del backup a los modales
     document.addEventListener('DOMContentLoaded', function() {
+        // Modal de restauración
         const modalRestore = document.getElementById('modalRestore');
         if (modalRestore) {
             modalRestore.addEventListener('show.bs.modal', function(event) {
@@ -239,6 +282,17 @@
                 const backupName = button.getAttribute('data-backup');
                 document.getElementById('backupFileName').textContent = backupName;
                 document.getElementById('backupFileInput').value = backupName;
+            });
+        }
+        
+        // Modal de eliminación
+        const modalDelete = document.getElementById('modalDelete');
+        if (modalDelete) {
+            modalDelete.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const backupName = button.getAttribute('data-backup');
+                document.getElementById('deleteFileName').textContent = backupName;
+                document.getElementById('deleteFileInput').value = backupName;
             });
         }
     });

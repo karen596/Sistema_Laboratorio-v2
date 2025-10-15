@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Entorno
+.env
+.env_produccion
+.env_desarrollo
+*.env
+
+# Base de datos
+*.sql
+backups/
+*.db
+*.sqlite
+
+# Imágenes y archivos temporales
+imagenes/
+temp/
+*.tmp
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archivos de verificación temporal
+verificar_*.py
+diagnostico_*.py
+crear_tabla_*.py

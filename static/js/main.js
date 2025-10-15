@@ -151,13 +151,51 @@
         }
       } catch (e) { console.error(e); flash('Error enviando comando', 'danger'); }
     } else {
-      // Comandos básicos sin JWT
-      if (texto.includes('equipos') || texto.includes('ir a equipos')) window.location.href = '/equipos';
-      else if (texto.includes('inventario') || texto.includes('ir a inventario')) window.location.href = '/inventario';
-      else if (texto.includes('reservas') || texto.includes('ir a reservas')) window.location.href = '/reservas';
-      else if (texto.includes('dashboard') || texto.includes('inicio')) window.location.href = '/dashboard';
-      else if (texto.includes('ayuda')) flash("Comandos básicos: 'ir a equipos', 'ir a inventario', 'ir a reservas', 'ir a dashboard'. Para CRUD inicie sesión API.", 'info', 4000);
-      else flash('Comando no reconocido. Inicie sesión API para más comandos.', 'warning');
+      // Comandos básicos sin JWT (navegación)
+      if (texto.includes('dashboard') || texto.includes('inicio') || texto.includes('principal')) {
+        window.location.href = '/dashboard';
+      }
+      else if (texto.includes('laboratorio')) {
+        window.location.href = '/laboratorios';
+      }
+      else if (texto.includes('equipo')) {
+        window.location.href = '/equipos';
+      }
+      else if (texto.includes('inventario') || texto.includes('stock') || texto.includes('almacén')) {
+        window.location.href = '/inventario';
+      }
+      else if (texto.includes('reserva')) {
+        window.location.href = '/reservas';
+      }
+      else if (texto.includes('usuario') || texto.includes('personas')) {
+        window.location.href = '/usuarios';
+      }
+      else if (texto.includes('reporte') || texto.includes('estadística') || texto.includes('informe')) {
+        window.location.href = '/reportes';
+      }
+      else if (texto.includes('configuración') || texto.includes('ajustes')) {
+        window.location.href = '/configuracion';
+      }
+      else if (texto.includes('manual') || texto.includes('ayuda general') || texto.includes('documentación')) {
+        window.location.href = '/ayuda';
+      }
+      else if (texto.includes('módulo') || texto.includes('funcionalidades')) {
+        window.location.href = '/modulos';
+      }
+      else if (texto.includes('cerrar sesión') || texto.includes('salir') || texto.includes('logout')) {
+        window.location.href = '/logout';
+      }
+      else if (texto.includes('ayuda') || texto.includes('comandos')) {
+        flash(`🎤 Comandos disponibles:
+        • Dashboard/Inicio • Laboratorios • Equipos • Inventario
+        • Reservas • Usuarios • Reportes • Configuración
+        • Ayuda • Módulos • Cerrar sesión
+        
+        💡 Diga "ir a [módulo]" para navegar`, 'info', 6000);
+      }
+      else {
+        flash('❌ Comando no reconocido. Diga "ayuda" para ver comandos disponibles.', 'warning', 3000);
+      }
     }
   };
 })();

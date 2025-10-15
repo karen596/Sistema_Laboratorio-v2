@@ -25,24 +25,33 @@
       </tr>
     </thead>
     <tbody>
-      {% for r in reservas %}
-      <tr data-id="{{ r.id }}" data-usuario="{{ r.usuario_nombre|lower }}" data-equipo="{{ r.equipo_nombre|lower }}">
-        <td class="text-muted">{{ r.id }}</td>
-        <td class="fw-semibold">{{ r.usuario_nombre }}</td>
-        <td>{{ r.equipo_nombre }}</td>
-        <td>{{ r.fecha_inicio }}</td>
-        <td>{{ r.fecha_fin }}</td>
-        <td>
-          {% set badge = 'info' if r.estado=='activa' else ('warning' if r.estado=='programada' else ('success' if r.estado=='completada' else 'secondary')) %}
-          <span class="badge bg-{{ badge }} text-uppercase">{{ r.estado }}</span>
-        </td>
-        <td class="text-end">
-          {% if r.estado in ['programada','activa'] %}
-          <button class="btn btn-sm btn-outline-danger btnCancelarRes">Cancelar</button>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
+      {% if reservas and reservas|length > 0 %}
+        {% for r in reservas %}
+        <tr data-id="{{ r.id }}" data-usuario="{{ r.usuario_nombre|lower }}" data-equipo="{{ r.equipo_nombre|lower }}">
+          <td class="text-muted">{{ r.id }}</td>
+          <td class="fw-semibold">{{ r.usuario_nombre }}</td>
+          <td>{{ r.equipo_nombre }}</td>
+          <td>{{ r.fecha_inicio }}</td>
+          <td>{{ r.fecha_fin }}</td>
+          <td>
+            {% set badge = 'info' if r.estado=='activa' else ('warning' if r.estado=='programada' else ('success' if r.estado=='completada' else 'secondary')) %}
+            <span class="badge bg-{{ badge }} text-uppercase">{{ r.estado }}</span>
+          </td>
+          <td class="text-end">
+            {% if r.estado in ['programada','activa'] %}
+            <button class="btn btn-sm btn-outline-danger btnCancelarRes">Cancelar</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+            No hay reservas registradas
+          </td>
+        </tr>
+      {% endif %}
     </tbody>
   </table>
 </div>
@@ -58,8 +67,25 @@
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">Equipo *</label>
-          <input type="text" id="equipoId" class="form-control" placeholder="ID del equipo (Ej: EQ-001)">
-          <small class="text-muted">Consulta los equipos disponibles en la sección Equipos</small>
+          <select id="equipoId" class="form-select" {% if not equipos or equipos|length == 0 %}disabled{% endif %}>
+            <option value="">-- Seleccione un equipo --</option>
+            {% if equipos and equipos|length > 0 %}
+              {% for equipo in equipos %}
+              <option value="{{ equipo.id }}">
+                {{ equipo.nombre }} ({{ equipo.tipo }}) - {{ equipo.estado }}
+              </option>
+              {% endfor %}
+            {% else %}
+              <option value="">No hay equipos disponibles</option>
+            {% endif %}
+          </select>
+          <small class="text-muted">
+            {% if equipos and equipos|length > 0 %}
+              Seleccione el equipo que desea reservar
+            {% else %}
+              No hay equipos disponibles para reservar. Registre equipos primero.
+            {% endif %}
+          </small>
         </div>
         <div class="mb-3">
           <label class="form-label">Fecha y Hora de Inicio *</label>

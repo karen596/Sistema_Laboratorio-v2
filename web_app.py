@@ -949,6 +949,49 @@ def backup():
     return render_template('backup.html', backups=backups, user=session)
 
 
+@app.route('/backup/download/<filename>')
+@require_login
+@require_level(4)
+def download_backup(filename):
+    """Descargar un archivo de backup"""
+    from flask import send_file
+    from pathlib import Path
+    import os
+    
+    # Validar que el archivo existe y es un backup válido
+    backup_dir = Path('backups')
+    backup_file = backup_dir / filename
+    
+    # Seguridad: verificar que el archivo está dentro del directorio de backups
+    try:
+        backup_file = backup_file.resolve()
+        backup_dir = backup_dir.resolve()
+        
+        if not str(backup_file).startswith(str(backup_dir)):
+            flash('Acceso denegado: ruta inválida', 'error')
+            return redirect(url_for('backup'))
+        
+        if not backup_file.exists() or not backup_file.is_file():
+            flash('Archivo de backup no encontrado', 'error')
+            return redirect(url_for('backup'))
+        
+        if not filename.endswith('.sql'):
+            flash('Tipo de archivo no permitido', 'error')
+            return redirect(url_for('backup'))
+        
+        # Enviar archivo para descarga
+        return send_file(
+            backup_file,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/sql'
+        )
+    
+    except Exception as e:
+        flash(f'Error descargando backup: {str(e)}', 'error')
+        return redirect(url_for('backup'))
+
+
 @app.route('/dashboard')
 @require_login
 def dashboard():
@@ -1069,6 +1112,7 @@ def crear_equipo_web():
         nombre = data.get('nombre')
         tipo = data.get('tipo')
         ubicacion = data.get('ubicacion')
+        laboratorio_id = data.get('laboratorio_id', 1)  # Por defecto laboratorio 1
         especificaciones_texto = data.get('especificaciones', '')
         
         if not nombre or not tipo:
@@ -1082,10 +1126,10 @@ def crear_equipo_web():
         especificaciones_json = json.dumps({"descripcion": especificaciones_texto})
         
         query = """
-            INSERT INTO equipos (id, nombre, tipo, estado, ubicacion, especificaciones)
-            VALUES (%s, %s, %s, 'disponible', %s, %s)
+            INSERT INTO equipos (id, nombre, tipo, estado, ubicacion, laboratorio_id, especificaciones)
+            VALUES (%s, %s, %s, 'disponible', %s, %s, %s)
         """
-        db_manager.execute_query(query, (equipo_id, nombre, tipo, ubicacion, especificaciones_json))
+        db_manager.execute_query(query, (equipo_id, nombre, tipo, ubicacion, laboratorio_id, especificaciones_json))
         
         return jsonify({'success': True, 'message': 'Equipo creado exitosamente', 'id': equipo_id}), 201
     except Exception as e:
@@ -1139,9 +1183,55 @@ def inventario():
                          user=session)
 
 
+@app.route('/inventario/crear', methods=['POST'])
+@require_login
+def crear_item_inventario_web():
+    """Crear item de inventario desde interfaz web (sin JWT)"""
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        categoria = data.get('categoria')
+        cantidad_actual = data.get('cantidad_actual', 0)
+        cantidad_minima = data.get('cantidad_minima', 0)
+        unidad = data.get('unidad', 'unidad')
+        ubicacion = data.get('ubicacion')
+        laboratorio_id = data.get('laboratorio_id', 1)  # Por defecto laboratorio 1
+        proveedor = data.get('proveedor')
+        costo_unitario = data.get('costo_unitario', 0)
+        
+        if not nombre:
+            return jsonify({'success': False, 'message': 'Nombre es requerido'}), 400
+        
+        # Generar ID único
+        import uuid
+        item_id = f"INV-{uuid.uuid4().hex[:8].upper()}"
+        
+        query = """
+            INSERT INTO inventario (id, nombre, categoria, cantidad_actual, cantidad_minima, 
+                                  unidad, ubicacion, laboratorio_id, proveedor, costo_unitario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        db_manager.execute_query(query, (item_id, nombre, categoria, cantidad_actual, 
+                                        cantidad_minima, unidad, ubicacion, laboratorio_id,
+                                        proveedor, costo_unitario))
+        
+        return jsonify({'success': True, 'message': 'Item de inventario creado exitosamente', 'id': item_id}), 201
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+
 @app.route('/reservas')
 @require_login
 def reservas():
+    # Obtener lista de equipos disponibles para el formulario
+    equipos_query = """
+        SELECT id, nombre, tipo, estado 
+        FROM equipos 
+        WHERE estado IN ('disponible', 'en_uso')
+        ORDER BY nombre
+    """
+    equipos_list = db_manager.execute_query(equipos_query) or []
+    
     if session.get('user_level', 1) >= 3:
         query = (
             """
@@ -1157,7 +1247,7 @@ def reservas():
             ORDER BY r.fecha_inicio DESC
             """
         )
-        reservas_list = db_manager.execute_query(query)
+        reservas_list = db_manager.execute_query(query) or []
     else:
         query = (
             """
@@ -1174,8 +1264,9 @@ def reservas():
             ORDER BY r.fecha_inicio DESC
             """
         )
-        reservas_list = db_manager.execute_query(query, (session['user_id'],))
-    return render_template('reservas.html', reservas=reservas_list, user=session)
+        reservas_list = db_manager.execute_query(query, (session['user_id'],)) or []
+    
+    return render_template('reservas.html', reservas=reservas_list, equipos=equipos_list, user=session)
 
 
 @app.route('/reservas/crear', methods=['POST'])
@@ -1245,7 +1336,7 @@ def reportes():
 @require_level(4)
 def configuracion():
     query = "SELECT clave, valor, descripcion FROM configuracion_sistema ORDER BY clave"
-    config_list = db_manager.execute_query(query)
+    config_list = db_manager.execute_query(query) or []
     return render_template('configuracion.html', configuraciones=config_list, user=session)
 
 @app.route('/entrenamiento-visual')
@@ -1541,14 +1632,20 @@ class LaboratoriosAPI(Resource):
         verify_jwt_or_admin()
         data = request.get_json(silent=True) or {}
         
-        campos_requeridos = ['nombre', 'tipo', 'laboratorio_id']
+        campos_requeridos = ['codigo', 'nombre', 'tipo']
         for campo in campos_requeridos:
             if not data.get(campo):
                 return {'message': f'{campo} es requerido'}, 400
         
-        # Validar que laboratorio_id no sea vacío
-        if not data['laboratorio_id'].strip():
-            return {'message': 'laboratorio_id no puede estar vacío'}, 400
+        # Validar que codigo no sea vacío
+        if not data['codigo'].strip():
+            return {'message': 'codigo no puede estar vacío'}, 400
+        
+        # Verificar que el código no exista ya
+        check_query = "SELECT id FROM laboratorios WHERE codigo = %s"
+        existing = db_manager.execute_query(check_query, (data['codigo'],))
+        if existing:
+            return {'message': 'Ya existe un laboratorio con ese código'}, 400
         
         query = """
             INSERT INTO laboratorios (codigo, nombre, tipo, ubicacion, capacidad_estudiantes,
@@ -1559,9 +1656,9 @@ class LaboratoriosAPI(Resource):
         try:
             db_manager.execute_query(query, (
                 data['codigo'], data['nombre'], data['tipo'],
-                data.get('ubicacion'), data.get('capacidad_estudiantes', 0),
-                data.get('area_m2'), data.get('responsable'),
-                data.get('equipamiento_especializado'), data.get('normas_seguridad')
+                data.get('ubicacion', ''), data.get('capacidad_estudiantes', 0),
+                data.get('area_m2'), data.get('responsable', ''),
+                data.get('equipamiento_especializado', ''), data.get('normas_seguridad', '')
             ))
             return {'message': 'Laboratorio creado exitosamente'}, 201
         except Exception as e:
@@ -1898,7 +1995,7 @@ class ComandosVozAPI(Resource):
 
 def procesar_comando_voz(comando: str):
     """
-    Procesador de comandos de voz simplificado - Solo navegación
+    Procesador de comandos de voz - Navegación entre módulos del sistema
     """
     comando = comando.lower().strip()
     
@@ -1907,42 +2004,73 @@ def procesar_comando_voz(comando: str):
     # =============================
     
     # Dashboard / Inicio
-    if any(p in comando for p in ['dashboard', 'inicio', 'home', 'principal']):
-        return {'mensaje': 'Navegando al dashboard...', 'exito': True, 'accion': 'navegar', 'url': '/dashboard'}
+    if any(p in comando for p in ['dashboard', 'inicio', 'home', 'principal', 'tablero']):
+        return {'mensaje': '📊 Navegando al dashboard...', 'exito': True, 'accion': 'navegar', 'url': '/dashboard'}
     
     # Laboratorios
-    if any(p in comando for p in ['laboratorios', 'laboratorio', 'labs']):
-        return {'mensaje': 'Navegando a laboratorios...', 'exito': True, 'accion': 'navegar', 'url': '/laboratorios'}
+    if any(p in comando for p in ['laboratorios', 'laboratorio', 'labs', 'lab']):
+        return {'mensaje': '🔬 Navegando a laboratorios...', 'exito': True, 'accion': 'navegar', 'url': '/laboratorios'}
     
     # Equipos
-    if any(p in comando for p in ['equipos', 'equipo']):
-        return {'mensaje': 'Navegando a equipos...', 'exito': True, 'accion': 'navegar', 'url': '/equipos'}
+    if any(p in comando for p in ['equipos', 'equipo', 'maquinaria', 'herramientas']):
+        return {'mensaje': '⚙️ Navegando a equipos...', 'exito': True, 'accion': 'navegar', 'url': '/equipos'}
     
     # Inventario
-    if any(p in comando for p in ['inventario', 'stock', 'almacén', 'almacen']):
-        return {'mensaje': 'Navegando a inventario...', 'exito': True, 'accion': 'navegar', 'url': '/inventario'}
+    if any(p in comando for p in ['inventario', 'stock', 'almacén', 'almacen', 'reactivos', 'materiales']):
+        return {'mensaje': '📦 Navegando a inventario...', 'exito': True, 'accion': 'navegar', 'url': '/inventario'}
     
     # Reservas
-    if any(p in comando for p in ['reservas', 'reserva']):
-        return {'mensaje': 'Navegando a reservas...', 'exito': True, 'accion': 'navegar', 'url': '/reservas'}
+    if any(p in comando for p in ['reservas', 'reserva', 'reservaciones', 'reservación']):
+        return {'mensaje': '📅 Navegando a reservas...', 'exito': True, 'accion': 'navegar', 'url': '/reservas'}
     
-    # Usuarios (solo para admins)
-    if any(p in comando for p in ['usuarios', 'usuario']):
-        return {'mensaje': 'Navegando a usuarios...', 'exito': True, 'accion': 'navegar', 'url': '/usuarios'}
+    # Usuarios
+    if any(p in comando for p in ['usuarios', 'usuario', 'personas', 'estudiantes']):
+        return {'mensaje': '👥 Navegando a usuarios...', 'exito': True, 'accion': 'navegar', 'url': '/usuarios'}
+    
+    # Reportes
+    if any(p in comando for p in ['reportes', 'reporte', 'informes', 'estadísticas', 'estadisticas']):
+        return {'mensaje': '📈 Navegando a reportes...', 'exito': True, 'accion': 'navegar', 'url': '/reportes'}
+    
+    # Configuración
+    if any(p in comando for p in ['configuración', 'configuracion', 'ajustes', 'settings']):
+        return {'mensaje': '⚙️ Navegando a configuración...', 'exito': True, 'accion': 'navegar', 'url': '/configuracion'}
+    
+    # Ayuda / Manual
+    if any(p in comando for p in ['manual', 'ayuda general', 'documentación', 'documentacion', 'guía', 'guia']):
+        return {'mensaje': '📖 Abriendo manual de usuario...', 'exito': True, 'accion': 'navegar', 'url': '/ayuda'}
+    
+    # Módulos del proyecto
+    if any(p in comando for p in ['módulos', 'modulos', 'funcionalidades', 'características', 'caracteristicas']):
+        return {'mensaje': '🧩 Navegando a módulos del proyecto...', 'exito': True, 'accion': 'navegar', 'url': '/modulos'}
+    
+    # Cerrar sesión
+    if any(p in comando for p in ['cerrar sesión', 'cerrar sesion', 'salir', 'logout', 'desconectar']):
+        return {'mensaje': '👋 Cerrando sesión...', 'exito': True, 'accion': 'navegar', 'url': '/logout'}
     
     # =============================
     # COMANDOS DE AYUDA
     # =============================
     
-    if any(p in comando for p in ['ayuda', 'help', 'comandos', 'qué puedo decir', 'que puedo decir']):
+    if any(p in comando for p in ['ayuda', 'help', 'comandos', 'qué puedo decir', 'que puedo decir', 'opciones']):
         return {
-            'mensaje': """Comandos de navegación disponibles:
-            • "Dashboard" o "Inicio" - Ir al panel principal
-            • "Laboratorios" - Ver todos los laboratorios
-            • "Equipos" - Gestión de equipos
-            • "Inventario" - Control de inventario
-            • "Reservas" - Sistema de reservas
-            • "Usuarios" - Gestión de usuarios""", 
+            'mensaje': """🎤 Comandos de voz disponibles:
+            
+📍 NAVEGACIÓN:
+• "Dashboard" o "Inicio" - Panel principal
+• "Laboratorios" - Gestión de laboratorios
+• "Equipos" - Gestión de equipos
+• "Inventario" - Control de inventario y reactivos
+• "Reservas" - Sistema de reservas
+• "Usuarios" - Gestión de usuarios
+• "Reportes" - Informes y estadísticas
+• "Configuración" - Ajustes del sistema
+• "Ayuda" - Manual de usuario
+• "Módulos" - Ver funcionalidades del proyecto
+
+🚪 SESIÓN:
+• "Cerrar sesión" - Salir del sistema
+
+💡 Tip: Puede decir variaciones como "ir a equipos", "mostrar inventario", etc.""", 
             'exito': True
         }
     
@@ -1951,7 +2079,7 @@ def procesar_comando_voz(comando: str):
     # =============================
     
     return {
-        'mensaje': f'Comando "{comando}" no reconocido. Diga "ayuda" para ver comandos disponibles.', 
+        'mensaje': f'❌ Comando "{comando}" no reconocido. Diga "ayuda" para ver todos los comandos disponibles.', 
         'exito': False
     }
 
@@ -2152,8 +2280,8 @@ class VisualRecognitionAPI(Resource):
                         equipo_query = """
                             SELECT e.id, e.nombre, e.tipo, e.estado, e.ubicacion, e.especificaciones,
                                    e.laboratorio_id, l.nombre as laboratorio_nombre, l.ubicacion as laboratorio_ubicacion,
-                                   e.equipo_id, e.descripcion,
-                                   DATE_FORMAT(e.fecha_registro, '%Y-%m-%d %H:%i') as fecha_registro
+                                   e.equipo_id, e.marca, e.modelo, e.numero_serie, e.observaciones,
+                                   DATE_FORMAT(e.fecha_creacion, '%Y-%m-%d %H:%i') as fecha_creacion
                             FROM equipos e
                             LEFT JOIN laboratorios l ON e.laboratorio_id = l.id
                             WHERE e.id = %s
@@ -2175,7 +2303,7 @@ class VisualRecognitionAPI(Resource):
                         item_query = """
                             SELECT i.id, i.nombre, i.categoria, i.cantidad_actual, i.unidad, i.ubicacion,
                                    i.laboratorio_id, l.nombre as laboratorio_nombre, l.ubicacion as laboratorio_ubicacion,
-                                   i.descripcion, i.cantidad_minima,
+                                   i.cantidad_minima, i.descripcion, i.proveedor,
                                    DATE_FORMAT(i.fecha_registro, '%Y-%m-%d %H:%i') as fecha_registro
                             FROM inventario i
                             LEFT JOIN laboratorios l ON i.laboratorio_id = l.id
@@ -2244,36 +2372,50 @@ class VisualRecognitionAPI(Resource):
             
             search_paths = []
             
+            # Crear directorios si no existen
+            os.makedirs('imagenes/entrenamiento/equipo', exist_ok=True)
+            os.makedirs('imagenes/entrenamiento/item', exist_ok=True)
+            os.makedirs('imagenes/equipo', exist_ok=True)
+            os.makedirs('imagenes/item', exist_ok=True)
+            
             # Ruta 1: Entrenamiento manual
             training_base = 'imagenes/entrenamiento'
             if os.path.exists(training_base):
                 for item_type in ['equipo', 'item']:
                     type_dir = os.path.join(training_base, item_type)
                     if os.path.exists(type_dir):
-                        for item_id in os.listdir(type_dir):
-                            item_dir = os.path.join(type_dir, item_id)
-                            if os.path.isdir(item_dir):
-                                search_paths.append({
-                                    'path': item_dir,
-                                    'type': item_type,
-                                    'id': item_id,
-                                    'source': 'training'
-                                })
+                        try:
+                            for item_id in os.listdir(type_dir):
+                                item_dir = os.path.join(type_dir, item_id)
+                                if os.path.isdir(item_dir):
+                                    search_paths.append({
+                                        'path': item_dir,
+                                        'type': item_type,
+                                        'id': item_id,
+                                        'source': 'training'
+                                    })
+                        except (OSError, PermissionError) as e:
+                            print(f"[WARN] Error accediendo a {type_dir}: {e}")
+                            continue
             
             # Ruta 2: Registro de equipos/items
             registro_base = 'imagenes'
             for item_type in ['equipo', 'item']:
                 type_dir = os.path.join(registro_base, item_type)
                 if os.path.exists(type_dir):
-                    for nombre_carpeta in os.listdir(type_dir):
-                        item_dir = os.path.join(type_dir, nombre_carpeta)
-                        if os.path.isdir(item_dir):
-                            search_paths.append({
-                                'path': item_dir,
-                                'type': item_type,
-                                'id': nombre_carpeta,
-                                'source': 'registro'
-                            })
+                    try:
+                        for nombre_carpeta in os.listdir(type_dir):
+                            item_dir = os.path.join(type_dir, nombre_carpeta)
+                            if os.path.isdir(item_dir):
+                                search_paths.append({
+                                    'path': item_dir,
+                                    'type': item_type,
+                                    'id': nombre_carpeta,
+                                    'source': 'registro'
+                                })
+                    except (OSError, PermissionError) as e:
+                        print(f"[WARN] Error accediendo a {type_dir}: {e}")
+                        continue
             
             print(f"[DEBUG] Total de carpetas a buscar: {len(search_paths)}")
             for sp in search_paths:
@@ -2309,8 +2451,12 @@ class VisualRecognitionAPI(Resource):
                         print(f"[WARN] Error leyendo metadata de {metadata_file}: {e}")
                 
                 # Comparar con todas las imágenes de este item
-                images_in_dir = [f for f in os.listdir(item_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
-                print(f"[DEBUG] Imágenes encontradas: {len(images_in_dir)} -> {images_in_dir}")
+                try:
+                    images_in_dir = [f for f in os.listdir(item_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
+                    print(f"[DEBUG] Imágenes encontradas: {len(images_in_dir)} -> {images_in_dir}")
+                except (OSError, PermissionError) as e:
+                    print(f"[WARN] Error listando imágenes en {item_dir}: {e}")
+                    continue
                 
                 for img_file in images_in_dir:
                     img_path = os.path.join(item_dir, img_file)
@@ -2389,45 +2535,66 @@ class VisualStatsAPI(Resource):
                 'imagenes_registro': 0
             }
             
+            # Crear directorios si no existen
+            os.makedirs('imagenes/entrenamiento/equipo', exist_ok=True)
+            os.makedirs('imagenes/entrenamiento/item', exist_ok=True)
+            os.makedirs('imagenes/equipo', exist_ok=True)
+            os.makedirs('imagenes/item', exist_ok=True)
+            
             # Contar imágenes de entrenamiento manual
             training_base = 'imagenes/entrenamiento'
             if os.path.exists(training_base):
                 for item_type in ['equipo', 'item']:
                     type_dir = os.path.join(training_base, item_type)
                     if os.path.exists(type_dir):
-                        items = [d for d in os.listdir(type_dir) if os.path.isdir(os.path.join(type_dir, d))]
-                        if item_type == 'equipo':
-                            stats['equipos_entrenados'] = len(items)
-                        else:
-                            stats['items_entrenados'] = len(items)
-                        
-                        for item_id in items:
-                            item_dir = os.path.join(type_dir, item_id)
-                            images = [f for f in os.listdir(item_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
-                            count = len(images)
-                            stats['imagenes_entrenamiento'] += count
-                            stats['total_imagenes'] += count
+                        try:
+                            items = [d for d in os.listdir(type_dir) if os.path.isdir(os.path.join(type_dir, d))]
+                            if item_type == 'equipo':
+                                stats['equipos_entrenados'] = len(items)
+                            else:
+                                stats['items_entrenados'] = len(items)
+                            
+                            for item_id in items:
+                                item_dir = os.path.join(type_dir, item_id)
+                                try:
+                                    images = [f for f in os.listdir(item_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
+                                    count = len(images)
+                                    stats['imagenes_entrenamiento'] += count
+                                    stats['total_imagenes'] += count
+                                except (OSError, PermissionError):
+                                    continue
+                        except (OSError, PermissionError):
+                            continue
             
             # Contar imágenes de registro
             registro_base = 'imagenes'
             for item_type in ['equipo', 'item']:
                 type_dir = os.path.join(registro_base, item_type)
                 if os.path.exists(type_dir):
-                    items = [d for d in os.listdir(type_dir) if os.path.isdir(os.path.join(type_dir, d))]
-                    if item_type == 'equipo':
-                        stats['equipos_registrados'] = len(items)
-                    else:
-                        stats['items_registrados'] = len(items)
-                    
-                    for nombre_carpeta in items:
-                        item_dir = os.path.join(type_dir, nombre_carpeta)
-                        images = [f for f in os.listdir(item_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
-                        count = len(images)
-                        stats['imagenes_registro'] += count
-                        stats['total_imagenes'] += count
+                    try:
+                        items = [d for d in os.listdir(type_dir) if os.path.isdir(os.path.join(type_dir, d))]
+                        if item_type == 'equipo':
+                            stats['equipos_registrados'] = len(items)
+                        else:
+                            stats['items_registrados'] = len(items)
+                        
+                        for nombre_carpeta in items:
+                            item_dir = os.path.join(type_dir, nombre_carpeta)
+                            try:
+                                images = [f for f in os.listdir(item_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
+                                count = len(images)
+                                stats['imagenes_registro'] += count
+                                stats['total_imagenes'] += count
+                            except (OSError, PermissionError):
+                                continue
+                    except (OSError, PermissionError):
+                        continue
             
             return {'stats': stats}, 200
         except Exception as e:
+            print(f"[ERROR] Error en VisualStatsAPI: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return {'message': f'Error obteniendo estadísticas: {str(e)}'}, 500
 
 class VisualManagementAPI(Resource):
