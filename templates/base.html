@@ -10,9 +10,9 @@
 </head>
 <body class="bg-light">
   <div class="d-flex">
-    <nav id="sidebar" class="sidebar bg-sena text-white p-3">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-flower2 fs-3 me-2 text-sena-accent"></i>
+    <nav id="sidebar" class="sidebar sidebar-modern text-white p-3">
+      <div class="d-flex align-items-center mb-3 float-animation">
+        <i class="bi bi-flower2 fs-3 me-2" style="color: #fff; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));"></i>
         <span class="fw-bold">Centro Minero SENA</span>
       </div>
       <hr class="border-light opacity-25">
@@ -28,7 +28,7 @@
         
         {% if user and user.get('user_level',0) >= 4 %}
         <li class="nav-item">
-          <a class="nav-link text-white {{ 'active' if request.path=='/registro-completo' }}" href="{{ url_for('registro_completo') }}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-weight: 500;">
+          <a class="nav-link text-white {{ 'active' if request.path=='/registro-completo' }}" href="{{ url_for('registro_completo') }}" style="background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%); font-weight: 500; box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);">
             <i class="bi bi-plus-circle me-2"></i>Registrar Equipo/Item
           </a>
         </li>
@@ -108,40 +108,43 @@
             <div class="col-md-4 mb-3">
               <h6 class="fw-bold text-sena">Centro Minero SENA</h6>
               <p class="small text-muted mb-2">Sistema de Gestión de Laboratorios</p>
-              <p class="small text-muted">Optimizando la administración de recursos educativos</p>
+              <p class="small text-muted mb-0">Optimizando la administración de recursos educativos</p>
             </div>
+            
             <div class="col-md-4 mb-3">
-              <h6 class="fw-bold">Enlaces Rápidos</h6>
+              <h6 class="fw-bold text-sena"><i class="bi bi-telephone me-2"></i>Contacto</h6>
               <ul class="list-unstyled small">
-                <li><a href="{{ url_for('dashboard') }}" class="text-decoration-none text-muted"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
-                <li><a href="{{ url_for('ayuda') }}" class="text-decoration-none text-muted"><i class="bi bi-question-circle me-1"></i>Ayuda</a></li>
-                <li><a href="{{ url_for('perfil') }}" class="text-decoration-none text-muted"><i class="bi bi-person-circle me-1"></i>Mi Perfil</a></li>
-                {% if user and user.get('user_level',0) >= 4 %}
-                <li><a href="{{ url_for('backup') }}" class="text-decoration-none text-muted"><i class="bi bi-database me-1"></i>Backup</a></li>
-                {% endif %}
+                <li class="mb-2">
+                  <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                  <span class="text-muted">Sogamoso, Boyacá, Colombia</span>
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-telephone-fill text-success me-2"></i>
+                  <a href="tel:+5746044440400" class="text-decoration-none text-muted">(604) 444 0400</a>
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-envelope-fill text-primary me-2"></i>
+                  <a href="mailto:gilcentrominero@gmail.com" class="text-decoration-none text-muted">gilcentrominero@gmail.com</a>
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-clock-fill text-warning me-2"></i>
+                  <span class="text-muted">Lun-Vie 7:00 AM - 5:00 PM</span>
+                </li>
               </ul>
             </div>
+            
             <div class="col-md-4 mb-3">
-              <h6 class="fw-bold">Información</h6>
-              <ul class="list-unstyled small">
-                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalAcercaDe" class="text-decoration-none text-muted"><i class="bi bi-info-circle me-1"></i>Acerca de Nosotros</a></li>
-                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalContacto" class="text-decoration-none text-muted"><i class="bi bi-envelope me-1"></i>Contacto</a></li>
-                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalPrivacidad" class="text-decoration-none text-muted"><i class="bi bi-shield-check me-1"></i>Política de Privacidad</a></li>
-                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalTerminos" class="text-decoration-none text-muted"><i class="bi bi-file-text me-1"></i>Términos de Uso</a></li>
-                <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalAccesibilidad" class="text-decoration-none text-muted"><i class="bi bi-universal-access me-1"></i>Accesibilidad</a></li>
-              </ul>
+              <h6 class="fw-bold text-sena"><i class="bi bi-people-fill me-2"></i>Desarrollado por:</h6>
+              <p class="small mb-1" style="font-weight: 500;">Steven Jose Valdelamar Gutierrez</p>
+              <p class="small mb-1" style="font-weight: 500;">Karen Stefanie Quintero Albarracin</p>
+              <p class="small mb-0" style="font-weight: 500;">Zharick Alejandra Camargo Velandia</p>
             </div>
           </div>
           <hr class="my-3">
           <div class="row">
-            <div class="col-md-6 text-center text-md-start">
+            <div class="col-12 text-center">
               <small class="text-muted">
-                <i class="bi bi-c-circle me-1"></i>2025 Centro Minero SENA - Todos los derechos reservados
-              </small>
-            </div>
-            <div class="col-md-6 text-center text-md-end">
-              <small class="text-muted">
-                Sistema v1.0 | Desarrollado con <i class="bi bi-heart-fill text-danger"></i>
+                <i class="bi bi-c-circle me-1"></i>2025 Centro Minero SENA | Sistema v1.0
               </small>
             </div>
           </div>

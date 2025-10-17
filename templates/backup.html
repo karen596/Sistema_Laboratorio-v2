@@ -1,14 +1,34 @@
 {% extends 'base.html' %}
 {% set title = 'Backup de Base de Datos' %}
 {% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Backups</li>
+    </ol>
+</nav>
+
 <style>
     .backup-header {
-        background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
         color: white;
         padding: 40px;
         border-radius: 15px;
         margin-bottom: 30px;
         text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border: none;
+    }
+    .backup-header i {
+        background: rgba(255,255,255,0.2);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
     }
     .backup-card {
         background: white;
@@ -16,50 +36,62 @@
         padding: 30px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
+        border: none;
+    }
+    .backup-card h4, .backup-card h6 {
+        color: #2d6a4f;
+        font-weight: 700;
     }
     .backup-item {
-        background: #f8f9fa;
-        border: 2px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px solid rgba(0, 184, 148, 0.2);
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 15px;
         transition: all 0.3s ease;
     }
     .backup-item:hover {
-        border-color: #2d6a4f;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        border-color: #00b894;
+        box-shadow: 0 4px 15px rgba(0, 184, 148, 0.2);
+        transform: translateY(-2px);
     }
     .backup-icon {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-size: 1.5em;
+        box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
     }
     .btn-create-backup {
-        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);
         border: none;
         padding: 15px 30px;
         border-radius: 10px;
         font-weight: 600;
         color: white;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
     }
     .btn-create-backup:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
         color: white;
     }
     .warning-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
+        background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, rgba(180, 83, 9, 0.1) 100%);
+        border-left: 4px solid #d97706;
         padding: 15px;
         border-radius: 8px;
         margin-bottom: 20px;
+        border: none;
+    }
+    .warning-box i {
+        color: #d97706;
     }
 </style>
 

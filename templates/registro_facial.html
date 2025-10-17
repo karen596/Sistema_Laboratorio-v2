@@ -2,46 +2,69 @@
 {% set title = 'Registro Facial' %}
 
 {% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Registro Facial</li>
+    </ol>
+</nav>
+
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <!-- Encabezado -->
-            <div class="text-center mb-4">
-                <h1 class="h3 mb-2">
-                    <i class="bi bi-person-badge text-primary"></i>
-                    Registro de Reconocimiento Facial
-                </h1>
-                <p class="text-muted">Registra tu rostro para acceso rápido al sistema</p>
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+                <div class="card-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="d-inline-block rounded-circle p-3" style="background: rgba(255,255,255,0.2);">
+                            <i class="bi bi-person-badge fs-1 text-white"></i>
+                        </div>
+                    </div>
+                    <h1 class="h3 mb-2 text-white fw-bold">Registro de Reconocimiento Facial</h1>
+                    <p class="mb-0 text-white opacity-90">Registra tu rostro para acceso rápido y seguro al sistema</p>
+                </div>
             </div>
 
             <!-- Información del Usuario -->
-            <div class="card mb-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                    <h6 class="mb-0 fw-bold" style="color: #2d6a4f;"><i class="bi bi-person-circle me-2"></i>Información del Usuario</h6>
+                </div>
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h5 class="card-title mb-1">{{ user.user_name }}</h5>
-                            <p class="text-muted mb-0">ID: {{ user.user_id }} | Tipo: {{ user.user_type }}</p>
+                            <h5 class="mb-1 fw-bold" style="color: #2d6a4f;">{{ user.user_name }}</h5>
+                            <p class="text-muted mb-0 small">
+                                <i class="bi bi-hash"></i> ID: {{ user.user_id }} | 
+                                <i class="bi bi-person"></i> Tipo: {{ user.user_type }}
+                            </p>
                         </div>
                         <div class="col-md-4 text-end">
-                            <span class="badge bg-primary fs-6">Nivel {{ user.user_level }}</span>
+                            <span class="badge rounded-pill px-3 py-2" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);">Nivel {{ user.user_level }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Panel de Captura -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-camera"></i>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+                    <h5 class="mb-0 text-white fw-bold">
+                        <i class="bi bi-camera-fill me-2"></i>
                         Captura de Rostro
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <!-- Estado del proceso -->
-                    <div id="statusAlert" class="alert alert-info" role="alert">
-                        <i class="bi bi-info-circle"></i>
-                        <strong>Listo para capturar:</strong> Posiciona tu rostro en el centro de la cámara
+                    <div id="statusAlert" class="alert border-0 shadow-sm" role="alert" style="background: linear-gradient(135deg, rgba(0, 184, 148, 0.1) 0%, rgba(0, 155, 125, 0.1) 100%); border-left: 4px solid #00b894 !important;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle fs-4 me-3" style="color: #00b894;"></i>
+                            <div>
+                                <strong style="color: #2d6a4f;">Listo para capturar:</strong>
+                                <span class="text-muted">Posiciona tu rostro en el centro de la cámara</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Área de cámara -->
@@ -88,21 +111,21 @@
                     </div>
 
                     <!-- Controles -->
-                    <div class="text-center mt-4">
-                        <button id="startCameraBtn" class="btn btn-sena me-2">
-                            <i class="bi bi-camera"></i> Iniciar Cámara
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                        <button id="startCameraBtn" class="btn" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);">
+                            <i class="bi bi-camera me-1"></i> Iniciar Cámara
                         </button>
-                        <button id="captureBtn" class="btn btn-success me-2" disabled>
-                            <i class="bi bi-camera-fill"></i> Capturar Rostro
+                        <button id="captureBtn" class="btn" disabled style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; border: none;">
+                            <i class="bi bi-camera-fill me-1"></i> Capturar Rostro
                         </button>
-                        <button id="registerBtn" class="btn btn-warning me-2" disabled>
-                            <i class="bi bi-person-plus"></i> Registrar
+                        <button id="registerBtn" class="btn" disabled style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; border: none;">
+                            <i class="bi bi-person-plus me-1"></i> Registrar
                         </button>
-                        <button id="retakeBtn" class="btn btn-secondary" disabled>
-                            <i class="bi bi-arrow-clockwise"></i> Repetir
+                        <button id="retakeBtn" class="btn" disabled style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; border: none;">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Repetir
                         </button>
-                        <button id="helpCameraBtn" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#modalAyudaCamara">
-                            <i class="bi bi-question-circle"></i> Ayuda
+                        <button id="helpCameraBtn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAyudaCamara">
+                            <i class="bi bi-question-circle me-1"></i> Ayuda
                         </button>
                     </div>
 
@@ -118,12 +141,12 @@
             </div>
 
             <!-- Historial (si existe) -->
-            <div id="historialContainer" class="card mt-4 d-none">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-clock-history"></i>
+            <div id="historialContainer" class="card border-0 shadow-sm mt-4 d-none">
+                <div class="card-header border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                    <h6 class="mb-0 fw-bold" style="color: #2d6a4f;">
+                        <i class="bi bi-clock-history me-2"></i>
                         Registro Anterior
-                    </h5>
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div id="historialContent"></div>
@@ -136,36 +159,99 @@
 <!-- Estilos CSS -->
 <style>
 .camera-container {
-    background: #f8f9fa;
-    border-radius: 0.375rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
     overflow: hidden;
-}
-
-.face-guide-circle {
-    width: 200px;
-    height: 200px;
-    border: 3px dashed #007bff;
-    border-radius: 50%;
-    background: rgba(0, 123, 255, 0.1);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(1.05); opacity: 0.9; }
-    100% { transform: scale(1); opacity: 0.7; }
-}
-
-.instructions ul {
-    padding-left: 1.2rem;
-}
-
-.instructions li {
-    margin-bottom: 0.3rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 #videoElement {
     background: #000;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.face-guide-circle {
+    width: 250px;
+    height: 250px;
+    border: 4px dashed #00b894;
+    border-radius: 50%;
+    background: rgba(0, 184, 148, 0.1);
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 30px rgba(0, 184, 148, 0.3);
+}
+
+@keyframes pulse {
+    0% { 
+        transform: scale(1); 
+        opacity: 0.7;
+        box-shadow: 0 0 30px rgba(0, 184, 148, 0.3);
+    }
+    50% { 
+        transform: scale(1.05); 
+        opacity: 1;
+        box-shadow: 0 0 50px rgba(0, 184, 148, 0.5);
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 0.7;
+        box-shadow: 0 0 30px rgba(0, 184, 148, 0.3);
+    }
+}
+
+.instructions {
+    background: linear-gradient(135deg, rgba(0, 184, 148, 0.05) 0%, rgba(0, 155, 125, 0.05) 100%);
+    border-radius: 12px;
+    padding: 15px;
+    border-left: 4px solid #00b894;
+}
+
+.instructions h6 {
+    color: #2d6a4f;
+    font-weight: 600;
+}
+
+.instructions ul {
+    padding-left: 1.2rem;
+    margin-bottom: 0;
+}
+
+.instructions li {
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+#cameraStatus {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+#capturedImage {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.progress {
+    height: 25px;
+    border-radius: 12px;
+    background: #e9ecef;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);
+    border-radius: 12px;
 }
 
 .quality-excellent { color: #28a745; }

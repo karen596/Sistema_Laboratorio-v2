@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
 {% set title = 'Reportes y Estadísticas' %}
 {% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Reportes y Estadísticas</li>
+  </ol>
+</nav>
+
 <style>
   .reportes-header {
-    background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+    background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
     color: white;
     padding: 25px;
     border-radius: 15px;
     margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: none;
   }
   .stat-mini-card {
     border: none;
@@ -25,16 +35,19 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
   .chart-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 2px solid #dee2e6;
+    background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+    border-bottom: none;
     padding: 15px 20px;
     border-radius: 15px 15px 0 0;
+    color: white;
   }
   .filter-section {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 20px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   }
   .export-btn {
     border-radius: 8px;
@@ -55,9 +68,12 @@
       <h3 class="mb-2"><i class="bi bi-graph-up-arrow me-2"></i>Reportes y Estadísticas</h3>
       <p class="mb-0 opacity-75">Análisis detallado del uso del sistema</p>
     </div>
-    <div>
-      <button class="btn btn-light export-btn" onclick="exportarReporte()">
-        <i class="bi bi-download me-2"></i>Exportar PDF
+    <div class="d-flex gap-2">
+      <button class="btn btn-light export-btn" onclick="exportarReportePDF()">
+        <i class="bi bi-file-pdf me-2"></i>Descargar PDF
+      </button>
+      <button class="btn btn-success export-btn" onclick="exportarReporteExcel()">
+        <i class="bi bi-file-excel me-2"></i>Descargar Excel
       </button>
     </div>
   </div>
@@ -84,7 +100,7 @@
       </select>
     </div>
     <div class="col-md-3">
-      <button class="btn btn-sena w-100" onclick="aplicarFiltros()">
+      <button class="btn w-100" onclick="aplicarFiltros()" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);">
         <i class="bi bi-funnel me-2"></i>Aplicar Filtros
       </button>
     </div>
@@ -94,38 +110,54 @@
 <!-- Mini Estadísticas -->
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
-    <div class="card stat-mini-card">
+    <div class="card stat-mini-card" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); border: none;">
       <div class="card-body text-center p-3">
-        <i class="bi bi-cpu text-success" style="font-size: 2rem;"></i>
-        <h4 class="mb-0 mt-2" id="totalEquipos">--</h4>
-        <small class="text-muted">Equipos Activos</small>
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-cpu text-white" style="font-size: 2rem;"></i>
+          </div>
+        </div>
+        <h4 class="mb-0 mt-2 text-white fw-bold" id="totalEquipos">--</h4>
+        <small class="text-white opacity-90">Equipos Activos</small>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-3">
-    <div class="card stat-mini-card">
+    <div class="card stat-mini-card" style="background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); border: none;">
       <div class="card-body text-center p-3">
-        <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
-        <h4 class="mb-0 mt-2" id="totalUsuarios">--</h4>
-        <small class="text-muted">Usuarios Activos</small>
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-people text-white" style="font-size: 2rem;"></i>
+          </div>
+        </div>
+        <h4 class="mb-0 mt-2 text-white fw-bold" id="totalUsuarios">--</h4>
+        <small class="text-white opacity-90">Usuarios Activos</small>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-3">
-    <div class="card stat-mini-card">
+    <div class="card stat-mini-card" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border: none;">
       <div class="card-body text-center p-3">
-        <i class="bi bi-calendar-check text-info" style="font-size: 2rem;"></i>
-        <h4 class="mb-0 mt-2" id="totalReservas">--</h4>
-        <small class="text-muted">Reservas</small>
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-calendar-check text-white" style="font-size: 2rem;"></i>
+          </div>
+        </div>
+        <h4 class="mb-0 mt-2 text-white fw-bold" id="totalReservas">--</h4>
+        <small class="text-white opacity-90">Reservas</small>
       </div>
     </div>
   </div>
   <div class="col-6 col-md-3">
-    <div class="card stat-mini-card">
+    <div class="card stat-mini-card" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border: none;">
       <div class="card-body text-center p-3">
-        <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
-        <h4 class="mb-0 mt-2" id="horasUso">--</h4>
-        <small class="text-muted">Horas de Uso</small>
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-clock-history text-white" style="font-size: 2rem;"></i>
+          </div>
+        </div>
+        <h4 class="mb-0 mt-2 text-white fw-bold" id="horasUso">--</h4>
+        <small class="text-white opacity-90">Horas de Uso</small>
       </div>
     </div>
   </div>
@@ -585,9 +617,66 @@ function aplicarFiltros() {
   cargarDatos();
 }
 
-function exportarReporte() {
-  alert('Función de exportación a PDF en desarrollo');
-  // Aquí iría la lógica para exportar a PDF
+function exportarReportePDF() {
+  const fechaInicio = document.getElementById('fechaInicio').value;
+  const fechaFin = document.getElementById('fechaFin').value;
+  
+  // Construir URL con parámetros
+  let url = '/reportes/descargar/pdf';
+  const params = new URLSearchParams();
+  
+  if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+  if (fechaFin) params.append('fecha_fin', fechaFin);
+  
+  if (params.toString()) {
+    url += '?' + params.toString();
+  }
+  
+  // Mostrar mensaje de carga
+  const btnPDF = event.target.closest('button');
+  const originalHTML = btnPDF.innerHTML;
+  btnPDF.disabled = true;
+  btnPDF.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando PDF...';
+  
+  // Descargar archivo
+  window.location.href = url;
+  
+  // Restaurar botón después de un momento
+  setTimeout(() => {
+    btnPDF.disabled = false;
+    btnPDF.innerHTML = originalHTML;
+  }, 2000);
+}
+
+function exportarReporteExcel() {
+  const fechaInicio = document.getElementById('fechaInicio').value;
+  const fechaFin = document.getElementById('fechaFin').value;
+  
+  // Construir URL con parámetros
+  let url = '/reportes/descargar/excel';
+  const params = new URLSearchParams();
+  
+  if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+  if (fechaFin) params.append('fecha_fin', fechaFin);
+  
+  if (params.toString()) {
+    url += '?' + params.toString();
+  }
+  
+  // Mostrar mensaje de carga
+  const btnExcel = event.target.closest('button');
+  const originalHTML = btnExcel.innerHTML;
+  btnExcel.disabled = true;
+  btnExcel.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando Excel...';
+  
+  // Descargar archivo
+  window.location.href = url;
+  
+  // Restaurar botón después de un momento
+  setTimeout(() => {
+    btnExcel.disabled = false;
+    btnExcel.innerHTML = originalHTML;
+  }, 2000);
 }
 
 // Inicializar

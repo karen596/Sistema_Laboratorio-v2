@@ -2,7 +2,7 @@
 # Sistema Web + API REST - Centro Minero SENA
 # Interfaz Web Moderna + API RESTful Completa (Flask)
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_file
 from flask_restful import Api, Resource, reqparse
 from flask_jwt_extended import JWTManager, create_access_token, verify_jwt_in_request, get_jwt_identity
 from flask_cors import CORS
@@ -17,6 +17,7 @@ import re
 import json
 import secrets
 from functools import wraps
+from utils.report_generator import report_generator
 
 # =====================================================================
 # CONFIGURACIÓN DE LA APLICACIÓN WEB
@@ -1331,6 +1332,68 @@ def reportes():
     return render_template('reportes.html', reportes=reportes_data, user=session)
 
 
+@app.route('/reportes/descargar/pdf')
+@require_login
+@require_level(2)
+def descargar_reporte_pdf():
+    """Descargar reporte en formato PDF"""
+    try:
+        # Obtener parámetros de fecha
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        
+        # Obtener datos del reporte
+        data = obtener_datos_completos_reporte(fecha_inicio, fecha_fin)
+        
+        # Generar PDF
+        pdf_buffer = report_generator.generar_pdf_estadisticas(data, fecha_inicio, fecha_fin)
+        
+        # Nombre del archivo
+        fecha_actual = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"reporte_laboratorio_{fecha_actual}.pdf"
+        
+        return send_file(
+            pdf_buffer,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        flash(f'Error al generar el reporte PDF: {str(e)}', 'error')
+        return redirect(url_for('reportes'))
+
+
+@app.route('/reportes/descargar/excel')
+@require_login
+@require_level(2)
+def descargar_reporte_excel():
+    """Descargar reporte en formato Excel"""
+    try:
+        # Obtener parámetros de fecha
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        
+        # Obtener datos del reporte
+        data = obtener_datos_completos_reporte(fecha_inicio, fecha_fin)
+        
+        # Generar Excel
+        excel_buffer = report_generator.generar_excel_estadisticas(data, fecha_inicio, fecha_fin)
+        
+        # Nombre del archivo
+        fecha_actual = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"reporte_laboratorio_{fecha_actual}.xlsx"
+        
+        return send_file(
+            excel_buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        flash(f'Error al generar el reporte Excel: {str(e)}', 'error')
+        return redirect(url_for('reportes'))
+
+
 @app.route('/configuracion')
 @require_login
 @require_level(4)
@@ -1429,6 +1492,110 @@ def get_reportes_data():
         """
     )
     data['usuarios_activos'] = db_manager.execute_query(q3)
+    return data
+
+
+def obtener_datos_completos_reporte(fecha_inicio=None, fecha_fin=None):
+    """
+    Obtener todos los datos necesarios para generar un reporte completo
+    
+    Args:
+        fecha_inicio: Fecha de inicio del período (formato YYYY-MM-DD)
+        fecha_fin: Fecha de fin del período (formato YYYY-MM-DD)
+    
+    Returns:
+        dict: Diccionario con todos los datos del reporte
+    """
+    data = {}
+    
+    # Estadísticas generales
+    # Total de equipos
+    total_eq = db_manager.execute_query("SELECT COUNT(*) as total FROM equipos")
+    data['total_equipos'] = total_eq[0]['total'] if total_eq else 0
+    
+    # Equipos activos (excluyendo fuera de servicio)
+    activos_eq = db_manager.execute_query("SELECT COUNT(*) as total FROM equipos WHERE estado != 'fuera_servicio'")
+    data['equipos_activos'] = activos_eq[0]['total'] if activos_eq else 0
+    
+    # Total de usuarios
+    total_users = db_manager.execute_query("SELECT COUNT(*) as total FROM usuarios WHERE activo = TRUE")
+    data['total_usuarios'] = total_users[0]['total'] if total_users else 0
+    
+    # Total de reservas
+    total_res = db_manager.execute_query("SELECT COUNT(*) as total FROM reservas")
+    data['total_reservas'] = total_res[0]['total'] if total_res else 0
+    
+    # Reservas activas
+    activas_res = db_manager.execute_query("SELECT COUNT(*) as total FROM reservas WHERE estado = 'activa'")
+    data['reservas_activas'] = activas_res[0]['total'] if activas_res else 0
+    
+    # Total de items en inventario
+    total_inv = db_manager.execute_query("SELECT COUNT(*) as total FROM inventario")
+    data['total_items'] = total_inv[0]['total'] if total_inv else 0
+    
+    # Items con stock bajo
+    bajo_inv = db_manager.execute_query("SELECT COUNT(*) as total FROM inventario WHERE cantidad_actual <= cantidad_minima")
+    data['items_stock_bajo'] = bajo_inv[0]['total'] if bajo_inv else 0
+    
+    # Equipos más utilizados (con filtro de fecha si se proporciona)
+    if fecha_inicio and fecha_fin:
+        q_equipos = """
+            SELECT e.nombre, COUNT(h.id) as usos
+            FROM equipos e
+            LEFT JOIN historial_uso h ON e.id = h.equipo_id 
+                AND h.fecha_uso BETWEEN %s AND %s
+            GROUP BY e.id, e.nombre
+            ORDER BY usos DESC
+            LIMIT 10
+        """
+        data['equipos_mas_usados'] = db_manager.execute_query(q_equipos, (fecha_inicio, fecha_fin)) or []
+    else:
+        q_equipos = """
+            SELECT e.nombre, COUNT(h.id) as usos
+            FROM equipos e
+            LEFT JOIN historial_uso h ON e.id = h.equipo_id 
+                AND h.fecha_uso >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY e.id, e.nombre
+            ORDER BY usos DESC
+            LIMIT 10
+        """
+        data['equipos_mas_usados'] = db_manager.execute_query(q_equipos) or []
+    
+    # Usuarios más activos (con filtro de fecha si se proporciona)
+    if fecha_inicio and fecha_fin:
+        q_usuarios = """
+            SELECT u.nombre, u.tipo, COUNT(c.id) as comandos
+            FROM usuarios u
+            LEFT JOIN comandos_voz c ON u.id = c.usuario_id 
+                AND c.fecha BETWEEN %s AND %s
+            WHERE u.activo = TRUE
+            GROUP BY u.id, u.nombre, u.tipo
+            ORDER BY comandos DESC
+            LIMIT 10
+        """
+        data['usuarios_activos'] = db_manager.execute_query(q_usuarios, (fecha_inicio, fecha_fin)) or []
+    else:
+        q_usuarios = """
+            SELECT u.nombre, u.tipo, COUNT(c.id) as comandos
+            FROM usuarios u
+            LEFT JOIN comandos_voz c ON u.id = c.usuario_id 
+                AND c.fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            WHERE u.activo = TRUE
+            GROUP BY u.id, u.nombre, u.tipo
+            ORDER BY comandos DESC
+            LIMIT 10
+        """
+        data['usuarios_activos'] = db_manager.execute_query(q_usuarios) or []
+    
+    # Inventario con stock bajo
+    q_inventario = """
+        SELECT nombre, categoria, cantidad_actual, cantidad_minima
+        FROM inventario
+        WHERE cantidad_actual <= cantidad_minima
+        ORDER BY (cantidad_actual - cantidad_minima)
+    """
+    data['inventario_bajo'] = db_manager.execute_query(q_inventario) or []
+    
     return data
 
 # =====================================================================

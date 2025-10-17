@@ -2,48 +2,81 @@
 {% set title = 'Entrenamiento Visual IA' %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h2><i class="bi bi-camera-reels me-2"></i>Entrenamiento Visual IA</h2>
-    <p class="text-muted mb-0">Entrena la IA para reconocer equipos e items por cámara</p>
-  </div>
-  <div class="d-flex gap-2">
-    <button class="btn btn-outline-sena" id="btnStats"><i class="bi bi-graph-up me-1"></i>Estadísticas</button>
-    <button class="btn btn-sena" data-bs-toggle="modal" data-bs-target="#modalEntrenar"><i class="bi bi-plus-lg me-1"></i>Entrenar</button>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">IA Visual</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h4 class="mb-1 text-white fw-bold"><i class="bi bi-robot me-2"></i>Entrenamiento Visual IA</h4>
+        <p class="mb-0 text-white opacity-90">Entrena la IA para reconocer equipos e items por cámara</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-light" id="btnStats"><i class="bi bi-graph-up me-1"></i>Estadísticas</button>
+        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#modalEntrenar" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);"><i class="bi bi-plus-lg me-1"></i>Entrenar</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Estadísticas -->
 <div class="row g-3 mb-4">
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <div class="h3 text-primary mb-0" id="statsEquipos">0</div>
-        <div class="small text-muted">Equipos Entrenados</div>
+    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);">
+      <div class="card-body p-3 text-center">
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-cpu fs-3 text-white"></i>
+          </div>
+        </div>
+        <div class="h2 text-white fw-bold mb-1" id="statsEquipos">0</div>
+        <div class="small text-white opacity-90">Equipos Entrenados</div>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <div class="h3 text-success mb-0" id="statsItems">0</div>
-        <div class="small text-muted">Items Entrenados</div>
+    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+      <div class="card-body p-3 text-center">
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-box-seam fs-3 text-white"></i>
+          </div>
+        </div>
+        <div class="h2 text-white fw-bold mb-1" id="statsItems">0</div>
+        <div class="small text-white opacity-90">Items Entrenados</div>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <div class="h3 text-info mb-0" id="statsImagenes">0</div>
-        <div class="small text-muted">Total Imágenes</div>
+    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);">
+      <div class="card-body p-3 text-center">
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-images fs-3 text-white"></i>
+          </div>
+        </div>
+        <div class="h2 text-white fw-bold mb-1" id="statsImagenes">0</div>
+        <div class="small text-white opacity-90">Total Imágenes</div>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <div class="h3 text-warning mb-0" id="statsCaracteristicas">0</div>
-        <div class="small text-muted">Características</div>
+    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);">
+      <div class="card-body p-3 text-center">
+        <div class="mb-2">
+          <div class="d-inline-block rounded-3 p-2" style="background: rgba(255,255,255,0.2);">
+            <i class="bi bi-diagram-3 fs-3 text-white"></i>
+          </div>
+        </div>
+        <div class="h2 text-white fw-bold mb-1" id="statsCaracteristicas">0</div>
+        <div class="small text-white opacity-90">Características</div>
       </div>
     </div>
   </div>
@@ -52,21 +85,21 @@
 <!-- Sección de Reconocimiento -->
 <div class="row g-4">
   <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-search me-2"></i>Probar Reconocimiento</h5>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+        <h5 class="mb-0 text-white fw-bold"><i class="bi bi-search me-2"></i>Probar Reconocimiento</h5>
       </div>
-      <div class="card-body">
+      <div class="card-body p-4">
         <div class="mb-3">
           <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden">
             <video id="testVideo" autoplay playsinline muted class="w-100 h-100"></video>
           </div>
         </div>
         <div class="d-flex gap-2 mb-3">
-          <button class="btn btn-outline-primary" id="btnIniciarCamara">
+          <button class="btn" id="btnIniciarCamara" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none;">
             <i class="bi bi-camera-video me-1"></i>Iniciar Cámara
           </button>
-          <button class="btn btn-primary" id="btnReconocer" disabled>
+          <button class="btn" id="btnReconocer" disabled style="background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); color: white; border: none;">
             <i class="bi bi-eye me-1"></i>Reconocer
           </button>
         </div>
@@ -78,11 +111,11 @@
   </div>
   
   <div class="col-md-6">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Detalles del Item</h5>
+    <div class="card border-0 shadow-sm">
+      <div class="card-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+        <h5 class="mb-0 text-white fw-bold"><i class="bi bi-info-circle me-2"></i>Detalles del Item</h5>
       </div>
-      <div class="card-body">
+      <div class="card-body p-4">
         <div id="detallesItem" class="text-center text-muted">
           <i class="bi bi-camera display-1 mb-3"></i>
           <p>Usa la cámara para reconocer un equipo o item</p>
@@ -95,16 +128,16 @@
 <!-- Modal: Entrenar IA -->
 <div class="modal fade" id="modalEntrenar" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-robot me-2"></i>Entrenar IA</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+        <h5 class="modal-title text-white fw-bold"><i class="bi bi-robot me-2"></i>Entrenar IA</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body p-4">
         <div class="row">
           <div class="col-md-6">
             <div class="mb-3">
-              <label class="form-label">Tipo de Item</label>
+              <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-tag me-1"></i>Tipo de Item</label>
               <select id="tipoItem" class="form-select">
                 <option value="">Seleccionar...</option>
                 <option value="equipo">Equipo</option>
@@ -113,14 +146,14 @@
             </div>
             
             <div class="mb-3">
-              <label class="form-label">Seleccionar Item</label>
+              <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-box me-1"></i>Seleccionar Item</label>
               <select id="selectItem" class="form-select" disabled>
                 <option value="">Primero selecciona el tipo...</option>
               </select>
             </div>
             
             <div class="mb-3">
-              <label class="form-label">Ángulo de Vista</label>
+              <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-arrows-angle-expand me-1"></i>Ángulo de Vista</label>
               <select id="anguloVista" class="form-select">
                 <option value="frontal">Frontal</option>
                 <option value="lateral">Lateral</option>
@@ -130,37 +163,39 @@
             </div>
             
             <div class="mb-3">
-              <label class="form-label">Descripción</label>
+              <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-chat-text me-1"></i>Descripción</label>
               <input id="descripcionEntrenamiento" class="form-control" placeholder="Ej: Vista frontal con buena iluminación">
             </div>
           </div>
           
           <div class="col-md-6">
             <div class="mb-3">
-              <label class="form-label">Cámara de Entrenamiento</label>
-              <div class="ratio ratio-4x3 bg-dark rounded overflow-hidden">
+              <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-camera-video me-1"></i>Cámara de Entrenamiento</label>
+              <div class="ratio ratio-4x3 bg-dark rounded overflow-hidden" style="box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <video id="trainVideo" autoplay playsinline muted class="w-100 h-100"></video>
               </div>
             </div>
             
             <div class="d-flex gap-2 mb-3">
-              <button class="btn btn-outline-primary" id="btnIniciarCamaraTrain">
+              <button class="btn" id="btnIniciarCamaraTrain" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none;">
                 <i class="bi bi-camera-video me-1"></i>Iniciar
               </button>
-              <button class="btn btn-success" id="btnCapturarTrain" disabled>
+              <button class="btn" id="btnCapturarTrain" disabled style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; border: none;">
                 <i class="bi bi-camera me-1"></i>Capturar
               </button>
             </div>
             
             <div id="imagenCapturada" class="d-none">
-              <img id="imgCapturada" class="img-fluid rounded border" style="max-height: 150px;">
+              <img id="imgCapturada" class="img-fluid rounded border" style="max-height: 150px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
             </div>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-sena" id="btnGuardarEntrenamiento" disabled>
+      <div class="modal-footer border-0 bg-light">
+        <button class="btn" data-bs-dismiss="modal" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; border: none;">
+          <i class="bi bi-x-circle me-1"></i>Cancelar
+        </button>
+        <button class="btn" id="btnGuardarEntrenamiento" disabled style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);">
           <i class="bi bi-robot me-1"></i>Entrenar IA
         </button>
       </div>

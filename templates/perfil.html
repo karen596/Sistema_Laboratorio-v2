@@ -1,9 +1,17 @@
 {% extends 'base.html' %}
 {% set title = 'Mi Perfil' %}
 {% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Mi Perfil</li>
+    </ol>
+</nav>
+
 <style>
     .profile-header {
-        background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
         color: white;
         padding: 40px;
         border-radius: 15px;
@@ -11,6 +19,8 @@
         text-align: center;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border: none;
     }
     .profile-header::before {
         content: '';
@@ -46,6 +56,11 @@
         border-radius: 15px;
         padding: 30px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border: none;
+    }
+    .profile-card h4, .profile-card h5 {
+        color: #2d6a4f;
+        font-weight: 700;
     }
     .form-label {
         font-weight: 600;
@@ -63,25 +78,40 @@
         box-shadow: 0 0 0 0.2rem rgba(45, 106, 79, 0.25);
     }
     .btn-primary {
-        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);
         border: none;
         padding: 12px 30px;
         border-radius: 10px;
         font-weight: 600;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
     }
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(45, 106, 79, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+    }
+    .btn-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
     .info-badge {
         display: inline-block;
         padding: 8px 15px;
-        background: #e7f3ff;
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 20px;
-        color: #1e5128;
+        color: white;
         font-weight: 600;
         margin: 5px;
+        backdrop-filter: blur(10px);
     }
     .stats-grid {
         display: grid;
@@ -90,11 +120,17 @@
         margin-top: 20px;
     }
     .stat-box {
-        background: #f8f9fa;
+        background: linear-gradient(135deg, rgba(0, 184, 148, 0.1) 0%, rgba(0, 155, 125, 0.1) 100%);
         padding: 20px;
         border-radius: 10px;
         text-align: center;
-        border: 2px solid #e9ecef;
+        border: 2px solid rgba(0, 184, 148, 0.2);
+        transition: all 0.3s ease;
+    }
+    .stat-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 184, 148, 0.2);
+        border-color: #00b894;
     }
     .stat-number {
         font-size: 2em;
@@ -176,9 +212,9 @@
                     </div>
 
                     <div class="col-12 mb-3">
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Nota:</strong> Tu ID de usuario y nivel de acceso no pueden ser modificados. 
+                        <div class="alert border-0" style="background: linear-gradient(135deg, rgba(0, 184, 148, 0.1) 0%, rgba(0, 155, 125, 0.1) 100%); border-left: 4px solid #00b894 !important;">
+                            <i class="bi bi-info-circle me-2" style="color: #00b894;"></i>
+                            <strong style="color: #2d6a4f;">Nota:</strong> Tu ID de usuario y nivel de acceso no pueden ser modificados. 
                             Contacta al administrador si necesitas cambios en estos campos.
                         </div>
                     </div>

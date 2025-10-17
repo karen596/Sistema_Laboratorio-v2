@@ -29,64 +29,80 @@
   }
   .stat-label {
     font-size: 0.875rem;
-    color: #6c757d;
-    font-weight: 500;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   .gradient-sena {
-    background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+    background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);
   }
   .gradient-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
   }
   .gradient-info {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
   }
   .gradient-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
   }
   .gradient-danger {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   }
   .gradient-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #00b894 0%, #009b7d 100%);
   }
   .card-header-custom {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 2px solid #dee2e6;
+    background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+    border-bottom: 2px solid #00b894;
     font-weight: 600;
+    color: #ffffff;
   }
   .activity-item {
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 10px;
-    background: #f8f9fa;
-    border-left: 3px solid #2d6a4f;
+    background: rgba(0, 184, 148, 0.1);
+    border-left: 3px solid #00b894;
     transition: all 0.3s ease;
   }
   .activity-item:hover {
-    background: #e9ecef;
+    background: rgba(0, 184, 148, 0.2);
     transform: translateX(5px);
   }
   .quick-action-card {
-    border: 2px dashed #dee2e6;
+    border: 2px dashed #00b894;
     border-radius: 15px;
     transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.5);
   }
   .quick-action-card:hover {
-    border-color: #2d6a4f;
-    background: #f8f9fa;
+    border-color: #009b7d;
+    background: rgba(0, 184, 148, 0.1);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.2);
+  }
+  .quick-action-card h6 {
+    color: #1e5128 !important;
+    font-weight: 700;
+  }
+  .quick-action-card .text-muted {
+    color: #2d6a4f !important;
+  }
+  .card-body.text-white h3,
+  .card-body.text-white p,
+  .card-body.text-white i {
+    color: #ffffff !important;
   }
 </style>
 
 <!-- Bienvenida -->
 <div class="row mb-4">
   <div class="col-12">
-    <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);">
+    <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 50%, #2d6a4f 100%);">
       <div class="card-body text-white p-4">
         <h3 class="mb-2 fw-bold"><i class="bi bi-speedometer2 me-2"></i>Dashboard - Centro Minero SENA</h3>
-        <p class="mb-0 opacity-75">Bienvenido, {{ user.get('nombre', 'Usuario') }} | Nivel de acceso: {{ user.get('user_level', 1) }}</p>
+        <p class="mb-0 opacity-90">Bienvenido, {{ user.get('nombre', 'Usuario') }} | Nivel de acceso: {{ user.get('user_level', 1) }}</p>
       </div>
     </div>
   </div>

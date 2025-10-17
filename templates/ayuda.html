@@ -1,14 +1,23 @@
 {% extends 'base.html' %}
 {% set title = 'Ayuda - Manual de Usuario' %}
 {% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Ayuda</li>
+    </ol>
+</nav>
+
 <style>
     .help-header {
-        background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
         color: white;
-        padding: 40px;
-        border-radius: 15px;
+        padding: 50px;
+        border-radius: 20px;
         margin-bottom: 30px;
         text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 212, 170, 0.3);
     }
     .help-section {
         background: white;
@@ -23,16 +32,17 @@
         box-shadow: 0 5px 20px rgba(0,0,0,0.15);
     }
     .help-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-        border-radius: 15px;
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 1.8em;
+        font-size: 2em;
         margin-bottom: 20px;
+        box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
     }
     .accordion-button:not(.collapsed) {
         background-color: #e7f3ff;
@@ -53,7 +63,241 @@
         width: 100%;
         height: 100%;
     }
+    
+    /* Estilos para la portada y el índice */
+    .manual-cover {
+        background: linear-gradient(135deg, rgba(0, 212, 170, 0.05) 0%, rgba(0, 184, 148, 0.05) 100%);
+        border: 2px solid #00b894;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+    }
+    
+    .manual-index {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Estilos para impresión/PDF */
+    @media print {
+        .breadcrumb, .btn, .modal, .navbar, .sidebar, .footer {
+            display: none !important;
+        }
+        
+        .manual-cover {
+            background: white !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 60px 40px !important;
+        }
+        
+        .manual-index {
+            background: white !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        
+        .help-header {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%) !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            page-break-after: avoid;
+        }
+        
+        .help-section {
+            page-break-inside: avoid;
+            box-shadow: none;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .accordion-collapse {
+            display: block !important;
+            height: auto !important;
+        }
+        
+        .accordion-button {
+            background-color: #f8f9fa !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            page-break-after: avoid;
+        }
+        
+        .card, .alert {
+            page-break-inside: avoid;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .badge {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+        
+        body {
+            font-size: 11pt;
+        }
+    }
 </style>
+
+<!-- Portada del Manual (solo visible en impresión) -->
+<div class="manual-cover" style="page-break-after: always;">
+    <div class="text-center py-4">
+        <!-- Institución -->
+        <h1 class="display-4 fw-bold mb-3" style="color: #00b894;">SENA</h1>
+        <p class="mb-1">Servicio Nacional de Aprendizaje</p>
+        <p class="text-muted small mb-3">Centro Minero - Regional Boyacá</p>
+        
+        <hr class="my-3" style="width: 50%; margin: 0 auto; border-top: 2px solid #00b894;">
+        
+        <!-- Título del Manual -->
+        <h1 class="display-5 fw-bold my-3" style="color: #2d6a4f;">MANUAL DE USUARIO</h1>
+        <h2 class="h3 mb-2" style="color: #00b894;">Sistema GIL</h2>
+        <p class="mb-3">Gestión Inteligente de Laboratorios</p>
+        
+        <hr class="my-3" style="width: 50%; margin: 0 auto; border-top: 2px solid #00b894;">
+        
+        <!-- Desarrolladores -->
+        <div class="my-3">
+            <p class="fw-bold mb-2" style="color: #2d6a4f;"><i class="bi bi-people-fill me-2"></i>Desarrollado por:</p>
+            <p class="small mb-1">Steven Jose Valdelamar Gutierrez</p>
+            <p class="small mb-1">Karen Stefanie Quintero Albarracin</p>
+            <p class="small mb-0">Zharick Alejandra Camargo Velandia</p>
+        </div>
+        
+        <!-- Fecha y Versión -->
+        <div class="mt-4">
+            <p class="text-muted small mb-1">Versión 1.0</p>
+            <p class="text-muted small mb-1">Sogamoso, Boyacá - Colombia</p>
+            <p class="text-muted small mb-0">2025</p>
+        </div>
+    </div>
+</div>
+
+<!-- Índice del Manual (solo visible en impresión) -->
+<div class="manual-index" style="page-break-after: always;">
+    <h3 class="mb-3 pb-2 border-bottom" style="color: #00b894;"><i class="bi bi-list-ul me-2"></i>ÍNDICE DE CONTENIDOS</h3>
+    
+    <div class="row">
+        <div class="col-12">
+            <ol class="list-group list-group-numbered">
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Introducción al Sistema</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Bienvenida y características principales</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 3</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Módulos del Sistema</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Dashboard, Laboratorios, Equipos, Inventario, Reservas</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 5</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Funciones Avanzadas</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Reconocimiento facial, comandos de voz, IA visual</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 8</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Gestión de Usuarios</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Crear, editar y administrar usuarios</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 12</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Manual de Reservas</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Cómo reservar, modificar y cancelar equipos</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 15</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Reportes y Estadísticas</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Generación y exportación de reportes</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 18</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Accesibilidad</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Opciones de accesibilidad y atajos de teclado</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 20</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Recuperación de Contraseña</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Pasos para recuperar acceso a tu cuenta</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 22</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Solución de Problemas Comunes</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Errores frecuentes y sus soluciones</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 24</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Contacto y Soporte Técnico</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Información de contacto y horarios de atención</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 26</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Preguntas Frecuentes (FAQ)</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Respuestas a las dudas más comunes</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 28</span>
+                </li>
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-1">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold small">Glosario de Términos</div>
+                        <small class="text-muted" style="font-size: 0.8rem;">Definiciones y conceptos clave</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">Pág. 30</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="alert alert-info mt-3 py-2">
+        <small>
+            <i class="bi bi-info-circle me-1"></i>
+            <strong>Nota:</strong> Este manual está diseñado para ser usado tanto en formato digital como impreso. Todas las secciones incluyen imágenes ilustrativas y ejemplos prácticos.
+        </small>
+    </div>
+</div>
 
 <div class="help-header">
     <i class="bi bi-question-circle" style="font-size: 3em; margin-bottom: 15px;"></i>
@@ -1098,14 +1342,48 @@
     </div>
 </div>
 
-<!-- Botón para imprimir manual -->
-<div class="text-center mt-4">
-    <button class="btn btn-lg btn-success" onclick="window.print()">
-        <i class="bi bi-printer me-2"></i>Imprimir Manual Completo
-    </button>
-    <a href="#" class="btn btn-lg btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalContacto">
-        <i class="bi bi-envelope me-2"></i>Contactar Soporte
-    </a>
+<!-- Botón para imprimir/descargar manual -->
+<div class="help-section text-center">
+    <h4 class="mb-4"><i class="bi bi-download me-2"></i>Descargar Manual Completo</h4>
+    <p class="text-muted mb-4">Descarga o imprime el manual completo con todas las imágenes y detalles</p>
+    
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <button class="btn btn-lg" style="background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%); color: white; border: none;" onclick="imprimirManual()">
+            <i class="bi bi-file-pdf me-2"></i>Descargar como PDF
+        </button>
+        <button class="btn btn-lg btn-outline-success" onclick="window.print()">
+            <i class="bi bi-printer me-2"></i>Imprimir Manual
+        </button>
+        <a href="mailto:gilcentrominero@gmail.com" class="btn btn-lg btn-outline-info">
+            <i class="bi bi-envelope me-2"></i>Contactar Soporte
+        </a>
+    </div>
+    
+    <div class="alert alert-info mt-4 mx-auto" style="max-width: 600px;">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Instrucciones para descargar:</strong>
+        <ol class="mb-0 mt-2 text-start">
+            <li>Haz clic en "Descargar como PDF"</li>
+            <li>En la ventana de impresión, selecciona "Guardar como PDF"</li>
+            <li>Elige la ubicación y guarda el archivo</li>
+            <li>El PDF incluirá todas las secciones expandidas con imágenes</li>
+        </ol>
+    </div>
 </div>
+
+<script>
+function imprimirManual() {
+    // Expandir todos los acordeones antes de imprimir
+    const collapses = document.querySelectorAll('.accordion-collapse');
+    collapses.forEach(collapse => {
+        collapse.classList.add('show');
+    });
+    
+    // Esperar un momento para que se expandan
+    setTimeout(() => {
+        window.print();
+    }, 300);
+}
+</script>
 
 {% endblock %}

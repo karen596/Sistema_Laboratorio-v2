@@ -1,29 +1,78 @@
 {% extends 'base.html' %}
 {% set title = 'Reservas' %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-  <div class="input-group" style="max-width:320px;">
-    <span class="input-group-text"><i class="bi bi-search"></i></span>
-    <input id="filtroRes" type="text" class="form-control" placeholder="Buscar por usuario o equipo...">
+<style>
+  .table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #2d6a4f;
+    font-weight: 600;
+    border: none;
+    padding: 12px;
+  }
+  .table tbody tr {
+    transition: all 0.3s ease;
+  }
+  .table tbody tr:hover {
+    background: rgba(0, 184, 148, 0.05);
+    transform: scale(1.01);
+  }
+</style>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Reservas</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h4 class="mb-1 text-white fw-bold"><i class="bi bi-calendar-event me-2"></i>Gestión de Reservas</h4>
+        <p class="mb-0 text-white opacity-90">Administra las reservas de equipos y recursos</p>
+      </div>
+      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <i class="bi bi-plus-circle me-1"></i>Nueva Reserva
+      </button>
+    </div>
   </div>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevaReserva">
-    <i class="bi bi-plus-circle me-1"></i>Nueva Reserva
-  </button>
 </div>
 
-<div class="table-responsive shadow-sm bg-white rounded">
-  <table class="table table-hover align-middle mb-0" id="tablaRes">
-    <thead class="table-light">
-      <tr>
-        <th>ID</th>
-        <th>Usuario</th>
-        <th>Equipo</th>
-        <th>Inicio</th>
-        <th>Fin</th>
-        <th>Estado</th>
-        <th></th>
-      </tr>
-    </thead>
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <h6 class="mb-0 fw-bold" style="color: #2d6a4f;"><i class="bi bi-funnel me-2"></i>Filtros de Búsqueda</h6>
+  </div>
+  <div class="card-body">
+    <div class="input-group">
+      <span class="input-group-text" style="background: #f8f9fa;"><i class="bi bi-search"></i></span>
+      <input id="filtroRes" type="text" class="form-control" placeholder="Buscar por usuario o equipo...">
+    </div>
+  </div>
+</div>
+
+<!-- Tabla de Reservas -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+    <h6 class="mb-0 text-white fw-bold"><i class="bi bi-list-check me-2"></i>Lista de Reservas</h6>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="tablaRes">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th><i class="bi bi-person me-1"></i>Usuario</th>
+            <th><i class="bi bi-laptop me-1"></i>Equipo</th>
+            <th><i class="bi bi-calendar-check me-1"></i>Inicio</th>
+            <th><i class="bi bi-calendar-x me-1"></i>Fin</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
     <tbody>
       {% if reservas and reservas|length > 0 %}
         {% for r in reservas %}
@@ -34,12 +83,21 @@
           <td>{{ r.fecha_inicio }}</td>
           <td>{{ r.fecha_fin }}</td>
           <td>
-            {% set badge = 'info' if r.estado=='activa' else ('warning' if r.estado=='programada' else ('success' if r.estado=='completada' else 'secondary')) %}
-            <span class="badge bg-{{ badge }} text-uppercase">{{ r.estado }}</span>
+            {% if r.estado == 'activa' %}
+            <span class="badge rounded-pill px-3 py-2" style="background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);">ACTIVA</span>
+            {% elif r.estado == 'programada' %}
+            <span class="badge rounded-pill px-3 py-2" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);">PROGRAMADA</span>
+            {% elif r.estado == 'completada' %}
+            <span class="badge rounded-pill px-3 py-2" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">COMPLETADA</span>
+            {% else %}
+            <span class="badge rounded-pill px-3 py-2" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">{{ r.estado|upper }}</span>
+            {% endif %}
           </td>
           <td class="text-end">
             {% if r.estado in ['programada','activa'] %}
-            <button class="btn btn-sm btn-outline-danger btnCancelarRes">Cancelar</button>
+            <button class="btn btn-sm btnCancelarRes" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none;">
+              <i class="bi bi-x-circle me-1"></i>Cancelar
+            </button>
             {% endif %}
           </td>
         </tr>
@@ -52,57 +110,65 @@
           </td>
         </tr>
       {% endif %}
-    </tbody>
-  </table>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- Modal: Nueva Reserva -->
 <div class="modal fade" id="modalNuevaReserva" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-calendar-plus me-2"></i>Nueva Reserva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+        <h5 class="modal-title text-white fw-bold"><i class="bi bi-calendar-plus me-2"></i>Nueva Reserva</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Equipo *</label>
-          <select id="equipoId" class="form-select" {% if not equipos or equipos|length == 0 %}disabled{% endif %}>
-            <option value="">-- Seleccione un equipo --</option>
-            {% if equipos and equipos|length > 0 %}
-              {% for equipo in equipos %}
-              <option value="{{ equipo.id }}">
-                {{ equipo.nombre }} ({{ equipo.tipo }}) - {{ equipo.estado }}
-              </option>
-              {% endfor %}
-            {% else %}
-              <option value="">No hay equipos disponibles</option>
-            {% endif %}
-          </select>
-          <small class="text-muted">
-            {% if equipos and equipos|length > 0 %}
-              Seleccione el equipo que desea reservar
-            {% else %}
-              No hay equipos disponibles para reservar. Registre equipos primero.
-            {% endif %}
-          </small>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Fecha y Hora de Inicio *</label>
-          <input type="datetime-local" id="fechaInicio" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Fecha y Hora de Fin *</label>
-          <input type="datetime-local" id="fechaFin" class="form-control">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Propósito *</label>
-          <textarea id="proposito" class="form-control" rows="3" placeholder="Describe el propósito de la reserva..."></textarea>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-laptop me-1"></i>Equipo *</label>
+            <select id="equipoId" class="form-select" {% if not equipos or equipos|length == 0 %}disabled{% endif %}>
+              <option value="">-- Seleccione un equipo --</option>
+              {% if equipos and equipos|length > 0 %}
+                {% for equipo in equipos %}
+                <option value="{{ equipo.id }}">
+                  {{ equipo.nombre }} ({{ equipo.tipo }}) - {{ equipo.estado }}
+                </option>
+                {% endfor %}
+              {% else %}
+                <option value="">No hay equipos disponibles</option>
+              {% endif %}
+            </select>
+            <small class="text-muted">
+              {% if equipos and equipos|length > 0 %}
+                <i class="bi bi-info-circle"></i> Seleccione el equipo que desea reservar
+              {% else %}
+                <i class="bi bi-exclamation-triangle"></i> No hay equipos disponibles para reservar. Registre equipos primero.
+              {% endif %}
+            </small>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-calendar-check me-1"></i>Fecha y Hora de Inicio *</label>
+            <input type="datetime-local" id="fechaInicio" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-calendar-x me-1"></i>Fecha y Hora de Fin *</label>
+            <input type="datetime-local" id="fechaFin" class="form-control">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold" style="color: #2d6a4f;"><i class="bi bi-chat-text me-1"></i>Propósito *</label>
+            <textarea id="proposito" class="form-control" rows="4" placeholder="Describe el propósito de la reserva..." style="resize: none;"></textarea>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btnCrearReserva">Crear Reserva</button>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn" data-bs-dismiss="modal" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; border: none;">
+          <i class="bi bi-x-circle me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn" id="btnCrearReserva" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);">
+          <i class="bi bi-check-circle me-1"></i>Crear Reserva
+        </button>
       </div>
     </div>
   </div>

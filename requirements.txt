@@ -98,6 +98,13 @@ charset-normalizer==3.4.3
 idna==3.10
 
 # =====================
+# GENERACIÓN DE REPORTES
+# =====================
+reportlab==4.2.5
+openpyxl==3.1.5
+xlsxwriter==3.2.0
+
+# =====================
 # DESARROLLO Y TESTING (OPCIONAL)
 # =====================
 # pytest==8.3.5

@@ -3,20 +3,71 @@
 {% block title %}Gestión de Registros - Centro Minero SENA{% endblock %}
 
 {% block content %}
+<style>
+    .table thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #2d6a4f;
+        font-weight: 600;
+        border: none;
+        padding: 12px;
+    }
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+    .table tbody tr:hover {
+        background: rgba(0, 184, 148, 0.05);
+        transform: scale(1.01);
+    }
+    .nav-pills .nav-link {
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link:not(.active) {
+        background: transparent;
+    }
+    .nav-pills .nav-link:not(.active):hover {
+        background: rgba(0, 184, 148, 0.1);
+        color: #00b894;
+        border-color: #00b894;
+    }
+    .btn-sm {
+        transition: all 0.3s ease;
+    }
+    .btn-sm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+</style>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Gestionar Registros</li>
+    </ol>
+</nav>
+
 <div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
+    <!-- Header -->
+    <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+        <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center">
-                <h2><i class="bi bi-folder-check me-2"></i>Gestión de Registros</h2>
-                <a href="{{ url_for('registro_completo') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-2"></i>Nuevo Registro
+                <div>
+                    <h2 class="mb-1 text-white fw-bold"><i class="bi bi-folder-check me-2"></i>Gestión de Registros</h2>
+                    <p class="mb-0 text-white opacity-90">Administra equipos e items del laboratorio</p>
+                </div>
+                <a href="{{ url_for('registro_completo') }}" class="btn btn-light" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <i class="bi bi-plus-circle me-1"></i>Nuevo Registro
                 </a>
             </div>
         </div>
     </div>
 
     <!-- Filtros -->
-    <div class="card mb-4">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+            <h6 class="mb-0 fw-bold" style="color: #2d6a4f;"><i class="bi bi-funnel me-2"></i>Filtros de Búsqueda</h6>
+        </div>
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3">
@@ -51,14 +102,14 @@
     </div>
 
     <!-- Tabs -->
-    <ul class="nav nav-tabs mb-3" id="registrosTabs" role="tablist">
+    <ul class="nav nav-pills mb-3 gap-2" id="registrosTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="equipos-tab" data-bs-toggle="tab" data-bs-target="#equipos" type="button">
+            <button class="nav-link active" id="equipos-tab" data-bs-toggle="tab" data-bs-target="#equipos" type="button" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); border: none;">
                 <i class="bi bi-cpu me-2"></i>Equipos (<span id="countEquipos">0</span>)
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button">
+            <button class="nav-link" id="items-tab" data-bs-toggle="tab" data-bs-target="#items" type="button" style="border: 2px solid #00b894; color: #00b894;">
                 <i class="bi bi-box-seam me-2"></i>Items (<span id="countItems">0</span>)
             </button>
         </li>
@@ -68,7 +119,10 @@
     <div class="tab-content" id="registrosTabContent">
         <!-- Tab Equipos -->
         <div class="tab-pane fade show active" id="equipos" role="tabpanel">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+                    <h6 class="mb-0 text-white fw-bold"><i class="bi bi-cpu me-2"></i>Lista de Equipos</h6>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -100,7 +154,10 @@
 
         <!-- Tab Items -->
         <div class="tab-pane fade" id="items" role="tabpanel">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0" style="background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);">
+                    <h6 class="mb-0 text-white fw-bold"><i class="bi bi-box-seam me-2"></i>Lista de Items</h6>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -327,13 +384,13 @@ function renderTablaEquipos(equipos) {
                 }
             </td>
             <td>
-                <button class="btn btn-sm btn-info" onclick="verDetalles('${eq.id}', 'equipo')">
+                <button class="btn btn-sm" onclick="verDetalles('${eq.id}', 'equipo')" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none;">
                     <i class="bi bi-eye"></i>
                 </button>
-                <button class="btn btn-sm btn-warning" onclick="editarRegistro('${eq.id}', 'equipo')">
+                <button class="btn btn-sm" onclick="editarRegistro('${eq.id}', 'equipo')" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; border: none;">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarRegistro('${eq.id}', 'equipo')">
+                <button class="btn btn-sm" onclick="eliminarRegistro('${eq.id}', 'equipo')" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none;">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -369,13 +426,13 @@ function renderTablaItems(items) {
                 }
             </td>
             <td>
-                <button class="btn btn-sm btn-info" onclick="verDetalles('${item.id}', 'item')">
+                <button class="btn btn-sm" onclick="verDetalles('${item.id}', 'item')" style="background: linear-gradient(135deg, #00b894 0%, #009b7d 100%); color: white; border: none;">
                     <i class="bi bi-eye"></i>
                 </button>
-                <button class="btn btn-sm btn-warning" onclick="editarRegistro('${item.id}', 'item')">
+                <button class="btn btn-sm" onclick="editarRegistro('${item.id}', 'item')" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; border: none;">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarRegistro('${item.id}', 'item')">
+                <button class="btn btn-sm" onclick="eliminarRegistro('${item.id}', 'item')" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none;">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
